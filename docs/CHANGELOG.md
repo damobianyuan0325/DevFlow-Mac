@@ -1,5 +1,9 @@
 # DevFlow 更新记录
 
+## 0.2.0-preview.2
+
+DMG安装交付；App内置双技能、离线说明和CLI；新增菜单发现入口。preview.1保留，不覆盖旧资产。
+
 ## v0.2.0-preview.1 · 首个 GitHub 预发布
 
 首个 GitHub Release 使用 `v0.2.0-preview.1`，App 数字版本 `0.2.0`，仓库保持 Private，发布类型为 pre-release。资产是否已发布以 [固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.1) 为准；范围与限制见 [本版说明](releases/v0.2.0-preview.1.md)。源码和脚本可供独立构建，检查结果须对应实际使用的源码，不沿用旧版本通过结论。

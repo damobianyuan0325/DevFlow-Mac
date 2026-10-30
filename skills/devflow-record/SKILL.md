@@ -34,7 +34,7 @@ description: "为 AI 辅助开发项目接入 DevFlow：将一句话需求拆为
 
 - 新项目从 [空模板](assets/project-template.json) 复制并填入实际内容。空模板可解析，但没有需求就没有验收意义。
 - [最小例子](assets/example/devflow-supervision.json) 带一个 Python 标签整理需求和三个真实组件检查，初始 E 为空。先复制整个 `assets/example/` 到独立目录，再用 [演示运行器](scripts/run_example.py) 执行；完整命令在工作流程中。不要将演示通过用作用户项目通过。
-- `DevFlowEvidence` 当前为 macOS 仓库源码构建工具，预览 App 包没有附带它。发现/获取方式见工作流程。不可用时仍可记录需求和实际动作，合同绑定保持缺失并报告缺口；不能自造摘要或给历史执行事后补绑定。
+- `DevFlowEvidence` 当前为 macOS 仓库源码构建工具，0.2.0-preview.2起Mac App内附带它，默认路径为 `/Applications/DevFlow.app/Contents/Helpers/DevFlowEvidence`，独立技能ZIP不含二进制。发现/获取方式见工作流程。不可用时仍可记录需求和实际动作，合同绑定保持缺失并报告缺口；不能自造摘要或给历史执行事后补绑定。
 
 ## 必须保留的真实性
 

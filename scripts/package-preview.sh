@@ -26,7 +26,7 @@ App 的 DevFlowReleaseVersion 也必须与本次发布版本完全一致。
 
 仅打包已有 ad-hoc App、已跟踪公开文档白名单、双技能和许可证。
 拒绝同名产物、符号链接、额外技能文件及断开的离线 Markdown 链接。
-需要 Python 3 标准库和本地 Git；不会执行教学例子，不提供 CLI 二进制。
+需要 Python 3 标准库和本地 Git；不会执行教学例子，App 内包含 CLI 二进制。
 USAGE
 }
 
@@ -86,6 +86,10 @@ APP_SOURCE_REVISION="$(/usr/libexec/PlistBuddy -c 'Print :DevFlowSourceRevision'
 EXECUTABLE="$APP_PATH/Contents/MacOS/DevFlow"
 [[ -f "$EXECUTABLE" && ! -L "$EXECUTABLE" ]] || fail "应用主程序不存在或不是普通文件。"
 [[ "$(/usr/bin/lipo -archs "$EXECUTABLE")" == "arm64" ]] || fail "只接受 arm64 构建；本脚本不会生成 Universal 包。"
+HELPER="$APP_PATH/Contents/Helpers/DevFlowEvidence"
+[[ -f "$HELPER" && -x "$HELPER" && ! -L "$HELPER" ]] || fail "缺少可执行的内置证据工具。"
+[[ "$(/usr/bin/lipo -archs "$HELPER")" == "arm64" ]] || fail "内置证据工具必须为 arm64。"
+/usr/bin/codesign --verify --strict "$HELPER"
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 SIGNATURE_INFO="$(/usr/bin/codesign -d --verbose=4 "$APP_PATH" 2>&1)"
 case "$SIGNATURE_INFO" in
@@ -104,7 +108,9 @@ spec = importlib.util.spec_from_file_location("devflow_packaging", root / "scrip
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 try:
-    module.public_payload(root, sys.argv[4])
+    payload = module.public_payload(root, sys.argv[4])
+    integration = root / "dist/DevFlow.app/Contents/Resources/AgentIntegration"
+    module.verify_staged_files(integration, payload)
     folder = module.reserve_output(Path(sys.argv[2]), sys.argv[3])
     module.stage_public_files(root, folder, sys.argv[4])
     if json.loads((folder / "BUILD-INFO.json").read_text())["sourceCommit"] != sys.argv[5]:
@@ -134,7 +140,8 @@ DevFlow ${RELEASE_VERSION} — App ${APP_VERSION}，macOS arm64 本地预览版
 
 包内含 App、LICENSE、公开文档白名单及两个完整技能目录。
 不含私人台账、原始会话、工作区、原始仓库或验收 evidence。
-DevFlowEvidence CLI 未随包提供，须按 docs/agent-quickstart.md 从源码构建。
+App内置CLI：DevFlow.app/Contents/Helpers/DevFlowEvidence。
+完整双技能在App的Contents/Resources/AgentIntegration内，随App安装。
 教学示例未在打包期间运行；其内容不代表真实项目或业务验收结果。
 README
 

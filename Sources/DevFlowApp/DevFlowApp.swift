@@ -25,6 +25,19 @@ struct DevFlowApp: App {
                     ])
                 }
             }
+            CommandGroup(after: .appInfo) {
+                Button("打开技能与接入说明…") {
+                    if let url = Bundle.main.resourceURL?.appendingPathComponent("AgentIntegration") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }.disabled(!FileManager.default.fileExists(atPath: (Bundle.main.resourceURL?.appendingPathComponent("AgentIntegration/AGENT_INSTALL.md").path ?? "")))
+                Button("复制给 AI 的接入说明") {
+                    if let url = Bundle.main.resourceURL?.appendingPathComponent("AgentIntegration/AGENT_INSTALL.md") {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString("请先读取 \(url.path)，按说明使用此版本的 DevFlow 技能与证据工具；保留已有项目历史，仅在我的授权范围内操作。", forType: .string)
+                    }
+                }.disabled(!FileManager.default.fileExists(atPath: (Bundle.main.resourceURL?.appendingPathComponent("AgentIntegration/AGENT_INSTALL.md").path ?? "")))
+            }
             CommandGroup(replacing: .newItem) {
                 Button("接入开发会话…") { store.connectDevelopmentSession() }
                     .keyboardShortcut("o", modifiers: [.command, .shift])

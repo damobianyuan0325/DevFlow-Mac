@@ -2,13 +2,13 @@
 
 原生 macOS 项目过程管理与监督客户端。把 AI 辅助开发中的需求、研发、测试、缺陷、决策和交付关联起来，让已有历史与持续新增记录都能回查。
 
-**首个 GitHub 预发布版本：`v0.2.0-preview.1`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。仓库保持 **Private**，访问源码和 Release 需要获得仓库授权。
+**当前 GitHub 预发布版本：`v0.2.0-preview.2`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。仓库保持 **Private**，访问源码和 Release 需要获得仓库授权。
 
 ## 开始使用
 
-无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.1) 取得 `DevFlow-0.2.0-preview.1-macOS-arm64.zip`，按 [用户指南](docs/USER_GUIDE.md) 解压并将 `DevFlow.app` 复制到“应用程序”。资产实际可用情况以 Release 页为准；未授权或尚未发布时该链接可能不可访问。
+无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2) 取得 `DevFlow-0.2.0-preview.2-macOS-arm64.dmg`，按 [用户指南](docs/USER_GUIDE.md) 打开 DMG 并将 `DevFlow.app` 复制到“应用程序”。资产实际可用情况以 Release 页为准；未授权或尚未发布时该链接可能不可访问。
 
-首次启动可能受到 macOS 对未公证应用的限制，不能保证下载后直接打开。若被系统拦截，推荐从源码在本机完成检查和构建；无需关闭系统安全保护。
+首次启动可能受到 macOS 对未公证应用的限制，不能保证下载后直接打开。免费预览版无需购买 Apple 开发者会员。确认来源及摘要后，可按用户指南使用系统“仍要打开”对单个应用放行；无需关闭全局系统安全保护。
 
 源码构建需要 macOS 14+ 与 Swift 5.9+ 工具链。在仓库根目录运行：
 
@@ -34,9 +34,11 @@ open dist/DevFlow.app
 
 [devflow-record](skills/devflow-record/SKILL.md) 用于保留一句话需求、拆解、真实动作与执行证据，生成本地监督包；[devflow-resolve](skills/devflow-resolve/SKILL.md) 用于核对反馈、补证或修复、复验和回写。两者均可独立使用，`gated-delivery` 是显式选择的可选研发适配。
 
-Release 的技能包文件名为 `DevFlow-agent-skills-0.2.0-preview.1.zip`，保留完整技能目录及配套资料；宿主安装方式见 [接入指南](docs/agent-quickstart.md) 与 [问题处理指南](docs/agent-resolution.md)。客户端不会自动安装或调用技能。
+也可直接下载 [Mac 安装 DMG](https://github.com/damobianyuan0325/DevFlow/releases/download/v0.2.0-preview.2/DevFlow-0.2.0-preview.2-macOS-arm64.dmg) 或 [完整技能 ZIP](https://github.com/damobianyuan0325/DevFlow/releases/download/v0.2.0-preview.2/DevFlow-agent-skills-0.2.0-preview.2.zip)。
 
-`DevFlowEvidence` 当前需从源码构建，应用 ZIP 和技能 ZIP 均不包含此 CLI 二进制。它提供只读 `contracts` 和 `inspect`，具体步骤见 [证据工具指南](docs/agent-quickstart.md#获取实际可用的证据工具)。
+Release 的技能包文件名为 `DevFlow-agent-skills-0.2.0-preview.2.zip`，保留完整技能目录及配套资料；宿主安装方式见 [接入指南](docs/agent-quickstart.md) 与 [问题处理指南](docs/agent-resolution.md)。客户端不会自动安装或调用技能。
+
+Mac App 内置完整双技能、离线说明和 `DevFlowEvidence` CLI；拖拽安装后全部保留。菜单可打开资料或复制给AI的接入提示，见[安装与代理接入](AGENT_INSTALL.md)。独立技能ZIP不含CLI。它提供只读 `contracts` 和 `inspect`，具体步骤见 [证据工具指南](docs/agent-quickstart.md#获取实际可用的证据工具)。
 
 ## 版本对应
 
@@ -44,8 +46,8 @@ Release 的技能包文件名为 `DevFlow-agent-skills-0.2.0-preview.1.zip`，�
 | --- | --- | --- |
 | 集成开发 | `main` | 持续变化，不等同于某个已发布包 |
 | 0.2 系列维护 | `codex/release/0.2` | 维护该系列的预览修复 |
-| 首个 GitHub Release/tag | `v0.2.0-preview.1` | Pre-release，固定 tag 对应精确源码提交 |
-| 发布资产版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.1` | 用于预览资产命名和 tag |
+| 当前 GitHub Release/tag | `v0.2.0-preview.2` | Pre-release，固定 tag 对应精确源码提交 |
+| 发布资产版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.2` | 用于预览资产命名和 tag |
 | App 数字版本 | [VERSION](VERSION)：`0.2.0` | macOS 应用内显示的数字版本 |
 | 早期本地研发 | `0.1.0`、`0.1.1` | 保留更新历史，不补造 GitHub Release/tag |
 
@@ -56,7 +58,7 @@ Tag 创建后不移动；新产物或修复使用新预览版本。分支、tag�
 | 需要什么 | 文档 |
 | --- | --- |
 | 下载、安装、首次使用、备份、升级、卸载及常见问题 | [用户指南](docs/USER_GUIDE.md) |
-| 当前版本的内容、资产和限制 | [v0.2.0-preview.1 发布说明](docs/releases/v0.2.0-preview.1.md) |
+| 当前版本的内容、资产和限制 | [v0.2.0-preview.2 发布说明](docs/releases/v0.2.0-preview.2.md) |
 | 构建、打包、检查与分发条件 | [发布指南](docs/RELEASE.md) |
 | 版本、分支、tag 与更新历史 | [版本规则](docs/VERSIONING.md) · [更新记录](docs/CHANGELOG.md) |
 | 功能与后续范围 | [产品](docs/PRODUCT.md) · [路线与验收](docs/ROADMAP.md) |

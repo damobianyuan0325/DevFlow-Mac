@@ -32,6 +32,22 @@ mkdir -p "$STAGE/Contents/MacOS" "$STAGE/Contents/Resources"
 cp "$BIN_DIR/DevFlow" "$STAGE/Contents/MacOS/DevFlow"
 cp "$TASK_ROOT/assets/DevFlow.icns" "$STAGE/Contents/Resources/DevFlow.icns"
 cp "$TASK_ROOT/LICENSE" "$STAGE/Contents/Resources/LICENSE"
+# Keep integration inside the app so dragging to Applications also installs the skills.
+python3 -B - "$TASK_ROOT" "$STAGE/Contents/Resources/AgentIntegration" "$SOURCE_REVISION" <<'PYBUILD'
+import importlib.util
+from pathlib import Path
+import sys
+root, destination = map(Path, sys.argv[1:3])
+spec = importlib.util.spec_from_file_location("packaging", root / "scripts/package-agent-skills.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+release, _ = module.versions(root)
+module.stage_public_files(root, destination, release, sys.argv[3])
+PYBUILD
+mkdir -p "$STAGE/Contents/Helpers"
+cp "$BIN_DIR/DevFlowEvidence" "$STAGE/Contents/Helpers/DevFlowEvidence"
+codesign --force --sign - "$STAGE/Contents/Helpers/DevFlowEvidence"
+
 for resource in "$BIN_DIR"/*.bundle; do
     if [ -d "$resource" ]; then cp -R "$resource" "$STAGE/Contents/Resources/"; fi
 done

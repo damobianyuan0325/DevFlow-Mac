@@ -27,9 +27,9 @@ DevFlow 通过**本地 JSON 文件**接收项目资料，不提供 HTTP 接口�
 
 ## 获取实际可用的证据工具
 
-当前 `DevFlowEvidence` 是**仓库源码中的 macOS 辅助工具**，提供 `contracts` 和 `inspect` 两个命令。需要 macOS 14+、Swift 5.9+ 工具链；已验证环境为 Apple Silicon。本指南不声称它是已发布的跨平台 CLI。
+当前 `DevFlowEvidence` 是**仓库源码中的 macOS 辅助工具**，提供 `contracts` 和 `inspect` 两个命令。运行内置CLI需要macOS14+；只有源码构建需要Swift5.9+；已验证环境为 Apple Silicon。本指南不声称它是已发布的跨平台 CLI。
 
-当前预览 ZIP **不包含这个辅助 CLI**。已持有源码仓库的用户可在本机构建；下面的仓库路径应替换为真实绝对路径：
+自0.2.0-preview.2起，Mac App内含CLI：`/Applications/DevFlow.app/Contents/Helpers/DevFlowEvidence`；可直接使用，无需Swift。独立技能ZIP不含二进制。菜单可打开随App安装的技能与说明。以下是可选的源码构建方式。已持有源码仓库的用户可在本机构建；下面的仓库路径应替换为真实绝对路径：
 
 ```sh
 cd "/你的绝对路径/DevFlow"

@@ -38,8 +38,9 @@ SKILL_FILES = (
     "skills/devflow-resolve/scripts/prepare_review.py",
 )
 PUBLIC_FILES = (
-    "LICENSE", "README.md", "CONTRIBUTING.md", "SECURITY.md", "VERSION", "REL_VERSION",
+    "LICENSE", "README.md", "AGENT_INSTALL.md", "CONTRIBUTING.md", "SECURITY.md", "VERSION", "REL_VERSION",
     "docs/USER_GUIDE.md", "docs/PRIVACY.md", "docs/CHANGELOG.md", "docs/RELEASE.md",
+    "docs/releases/v0.2.0-preview.1.md",
     "docs/VERSIONING.md", "docs/agent-quickstart.md", "docs/agent-resolution.md",
     "docs/supervision-protocol.md", "docs/PRODUCT.md", "docs/ROADMAP.md", "docs/BRAND.md",
 )
@@ -142,28 +143,33 @@ def check_links(payload):
                     raise ValueError(f"Unknown offline heading in {name}: {target}")
 
 
-def public_payload(root, release):
-    commit = subprocess.check_output(["git", "-C", str(root), "rev-parse", "--verify", "HEAD"], text=True).strip()
-    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
-        raise ValueError("Cannot identify the source commit")
-    clean = subprocess.run(["git", "-C", str(root), "diff", "--quiet", "HEAD", "--"])
-    if clean.returncode != 0:
-        raise ValueError("Tracked source files differ from HEAD; freeze a clean commit before packaging")
+def public_payload(root, release, source_revision=None):
     actual_release, app_version = versions(root, release)
     selected = (*PUBLIC_FILES, f"docs/releases/v{release}.md", *SKILL_FILES)
-    query = subprocess.run(["git", "-C", str(root), "ls-files", "--stage", "-z", "--", *PUBLIC_FILES,
-                            f"docs/releases/v{release}.md", "skills/devflow-record", "skills/devflow-resolve"],
-                           capture_output=True, check=True)
-    tracked = {}
-    for entry in query.stdout.decode("utf-8").split("\0"):
-        if entry:
-            identity, file = entry.split("\t", 1)
-            mode, _, stage = identity.split()
-            if mode not in ("100644", "100755") or stage != "0":
-                raise ValueError(f"Unsupported tracked input mode or unresolved merge: {file}")
-            tracked[file] = mode
-    if set(tracked) != set(selected):
-        raise ValueError(f"Tracked public whitelist mismatch; missing={sorted(set(selected)-set(tracked))}, extra={sorted(set(tracked)-set(selected))}")
+    if source_revision is None:
+        commit = subprocess.check_output(["git", "-C", str(root), "rev-parse", "--verify", "HEAD"], text=True).strip()
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+            raise ValueError("Cannot identify the source commit")
+        clean = subprocess.run(["git", "-C", str(root), "diff", "--quiet", "HEAD", "--"])
+        if clean.returncode != 0:
+            raise ValueError("Tracked source files differ from HEAD; freeze a clean commit before packaging")
+        actual_release, app_version = versions(root, release)
+        selected = (*PUBLIC_FILES, f"docs/releases/v{release}.md", *SKILL_FILES)
+        query = subprocess.run(["git", "-C", str(root), "ls-files", "--stage", "-z", "--", *PUBLIC_FILES,
+                                f"docs/releases/v{release}.md", "skills/devflow-record", "skills/devflow-resolve"],
+                               capture_output=True, check=True)
+        tracked = {}
+        for entry in query.stdout.decode("utf-8").split("\0"):
+            if entry:
+                identity, file = entry.split("\t", 1)
+                mode, _, stage = identity.split()
+                if mode not in ("100644", "100755") or stage != "0":
+                    raise ValueError(f"Unsupported tracked input mode or unresolved merge: {file}")
+                tracked[file] = mode
+        if set(tracked) != set(selected):
+            raise ValueError(f"Tracked public whitelist mismatch; missing={sorted(set(selected)-set(tracked))}, extra={sorted(set(tracked)-set(selected))}")
+    else:
+        commit = source_revision
     check_skill_tree(root)
     payload = {file: read_regular(root / file) for file in selected}
     if sum(map(len, payload.values())) > MAX_TOTAL_BYTES:
@@ -180,11 +186,11 @@ def public_payload(root, release):
 
 先读[代理接入指南](docs/agent-quickstart.md)、[问题处理指南](docs/agent-resolution.md)和[用户指南](docs/USER_GUIDE.md)。复制技能时保留完整目录及其 references/assets/scripts；调用方式由所用 AI 宿主决定，本包不会安装或自动启动技能。
 
-DevFlowEvidence CLI 不随包提供，必须从对应版本的 DevFlow macOS 源码构建，见[获取 CLI](docs/agent-quickstart.md#获取实际可用的证据工具)。gated-delivery 是可选适配，不是必需依赖。教学例子必须先复制到独立目录；打包未执行例子，也不代表用户项目验收通过。
+独立技能 ZIP 不含 CLI；同版本 Mac App 内含 DevFlowEvidence，无需源码。先读[安装与接入](AGENT_INSTALL.md)，其他环境见[获取 CLI](docs/agent-quickstart.md#获取实际可用的证据工具)。gated-delivery 是可选适配，不是必需依赖。教学例子必须先复制到独立目录；打包未执行例子，也不代表用户项目验收通过。
 
 只包含明确白名单中的公开文档和已跟踪技能，没有用户会话、工作区或私人验收日志。适用[MIT 许可证](LICENSE)；发布版本与 App 版本的区别见[版本规则](docs/VERSIONING.md)。
 
-[BUILD-INFO.json](BUILD-INFO.json) 保存打包来源提交和两个版本标识。它不替代 App 原生验收；CLI 二进制和源码仓库仍需另行获取。
+[BUILD-INFO.json](BUILD-INFO.json) 保存打包来源提交和两个版本标识。它不替代 App 原生验收；独立技能 ZIP 不含二进制，CLI 可从同版本 Mac App 取得。
 """.encode("utf-8")
     check_links(payload)
     return payload
@@ -210,14 +216,25 @@ def reserve_output(output_dir, name):
     return folder
 
 
-def stage_public_files(root, destination, release):
-    payload = public_payload(root, release)
+def stage_public_files(root, destination, release, source_revision=None):
+    payload = public_payload(root, release, source_revision)
     for name, data in payload.items():
         target = destination / name
         no_symlinks(target)
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("xb") as handle:
             handle.write(data)
+
+
+def verify_staged_files(destination, payload):
+    no_symlinks(destination)
+    actual = {}
+    for path in destination.rglob("*"):
+        no_symlinks(path)
+        if not path.is_dir():
+            actual[path.relative_to(destination).as_posix()] = read_regular(path)
+    if actual != payload:
+        raise ValueError("Bundled integration differs from the frozen public payload; rebuild the App")
 
 
 def write_archive(folder):

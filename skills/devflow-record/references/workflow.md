@@ -2,7 +2,7 @@
 
 ## 1. 取得真实工具
 
-本技能本身不携带编译后的 CLI。DevFlow 0.2.0 预览 App/ZIP 也未附带 DevFlowEvidence。先查用户提供的可执行路径，或已授权的 DevFlow 源码目录里的 `.build/debug/DevFlowEvidence` / `.build/release/DevFlowEvidence`。不要假设它在 PATH，也不要猜公开仓库地址。
+本技能本身不携带编译后的 CLI。从0.2.0-preview.2起，Mac App已内置CLI，默认路径为 `/Applications/DevFlow.app/Contents/Helpers/DevFlowEvidence`（自定义安装位置需调整）；先使用本机实际可读版本。先查用户提供的可执行路径，或已授权的 DevFlow 源码目录里的 `.build/debug/DevFlowEvidence` / `.build/release/DevFlowEvidence`。不要假设它在 PATH，也不要猜公开仓库地址。
 
 有本地 DevFlow 源码且允许构建时，在 macOS 的 Swift 工具链下：
 
