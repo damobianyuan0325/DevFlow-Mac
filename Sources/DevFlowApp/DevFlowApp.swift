@@ -15,6 +15,16 @@ struct DevFlowApp: App {
         }
         .defaultSize(width: 1320, height: 840)
         .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("关于 DevFlow") {
+                    NSApp.orderFrontStandardAboutPanel(options: [
+                        .applicationName: "DevFlow",
+                        .applicationVersion: AppResources.releaseVersion,
+                        .version: "",
+                        .credits: NSAttributedString(string: "本地项目研发监督 · 预览版\nMIT License")
+                    ])
+                }
+            }
             CommandGroup(replacing: .newItem) {
                 Button("接入开发会话…") { store.connectDevelopmentSession() }
                     .keyboardShortcut("o", modifiers: [.command, .shift])

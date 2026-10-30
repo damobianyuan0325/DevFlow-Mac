@@ -2,11 +2,15 @@
 
 原生 macOS 项目过程管理与监督客户端。把 AI 辅助开发中的需求、研发、测试、缺陷、决策和交付关联起来，让已有历史与持续新增记录都能回查。
 
-当前版本是 **0.2.0 本地预览**。应用使用 SwiftUI/AppKit 和 Foundation，无第三方运行依赖；当前预览打包面向 Apple Silicon。它只读用户选择的本地资料，不调用外部模型、不上传项目、不自动调度或控制开发代理。
+**首个 GitHub 预发布版本：`v0.2.0-preview.1`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。仓库保持 **Private**，访问源码和 Release 需要获得仓库授权。
 
 ## 开始使用
 
-需要 macOS 14+ 与 Swift 5.9+ 工具链。在仓库根目录运行：
+无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.1) 取得 `DevFlow-0.2.0-preview.1-macOS-arm64.zip`，按 [用户指南](docs/USER_GUIDE.md) 解压并将 `DevFlow.app` 复制到“应用程序”。资产实际可用情况以 Release 页为准；未授权或尚未发布时该链接可能不可访问。
+
+首次启动可能受到 macOS 对未公证应用的限制，不能保证下载后直接打开。若被系统拦截，推荐从源码在本机完成检查和构建；无需关闭系统安全保护。
+
+源码构建需要 macOS 14+ 与 Swift 5.9+ 工具链。在仓库根目录运行：
 
 ```sh
 bash scripts/test.sh
@@ -14,40 +18,47 @@ bash scripts/build-app.sh
 open dist/DevFlow.app
 ```
 
-测试脚本执行独立的 Swift 检查程序；构建脚本生成 `dist/DevFlow.app` 并核验本地 ad-hoc 签名。macOS 15.1、Swift 6.0.2、Apple Silicon 是开发阶段实际使用过的环境；其他系统和架构仍需要各自验证。构建目标不等于兼容性认证。
-
-首次可点“查看复盘样本”，对应首页的“先看看教学复盘样本”。内置内容是明确标注的**合成教学记录**，演示需求、失败、修复和缺证的阅读方式，不代表真实项目或真实测试已经发生。
-
-使用“导入项目资料”选择 Markdown 资料目录、单个 Markdown 文件或 DevFlow JSON 包。按类型、搜索和日期查看记录，检查关联、原文摘录及来源限制；反馈可编辑、保存和复制，由用户带回原开发聊天。
+首次点击“先看看教学复盘样本”，或从侧栏“打开复盘样本”开始。样本是明确标注的合成教学内容，不是实际项目执行证明。导入自己的资料后，可查看原文、历史与关联，编辑反馈并手动带回开发聊天。
 
 ## 当前能力
 
-- **项目与历史**：只读导入、来源查看、已知事件日期筛选、未知日期提示、历史修订保留及本地持久化。读取失败保留最后成功读取的内容。
-- **统一监督工作台**：schemaVersion=2 包组织原话、拆解、验收、任务、测试设计、每次执行、问题与交付；schemaVersion=1 历史资料继续支持。
-- **明确接入公开动作**：手动选择本地 Codex JSONL，单独导入或为项目关联最多 8 个会话。查看支持格式中的公开进展、命令、文件变更、工具调用及结果；未接入、截断和未展开内容保留提示。
-- **证据适用性**：分开显示测试设计、历史结果和当前核对状态，检查验收合同、源码及日志身份、层级和实际计数。修复声明与修复后有效复验分开。
-- **手动介入**：阶段简报列出已有依据、缺口及介入对象；反馈支持编辑、保存和复制。复制不表示发送、验收或解决问题。
-- **前台读取**：当前项目每 15 秒读取，也可手动刷新、暂停自动读取或停用某个会话并保留此前内容。暂停资料读取不会暂停代理。
+- 只读导入 Markdown 目录、单文件和 DevFlow JSON，支持搜索、类型与事件日期筛选、历史修订和本地持久化。
+- schemaVersion=2 监督包组织原话、需求拆解、验收、任务、测试设计、每次执行、问题与交付；schemaVersion=1 继续支持。
+- 手选本地 Codex JSONL，单独导入或为项目关联最多 8 个会话，查看支持格式中的公开动作及来源缺口。
+- 区分测试设计、历史结果和当前适用性，核对合同、源码、日志、层级与实际计数；修复声明和有效复验分开。
+- 提供阶段简报、可编辑并保存的手动反馈；前台当前项目每 15 秒读取，可手动刷新、暂停或停用单个会话。
 
-客户端只依据已提供的资料核对，不内置 AI 自动拆解，不推断隐藏思考，也不从记录条数计算整体质量分、费用或虚构进度。摘要一致不证明业务预期充分或日志不可伪造。
+应用无第三方运行依赖，不联网调用模型、不上传项目、不自动调度或控制代理。复制反馈不表示发送，暂停读取不暂停代理；摘要一致和记录条数也不能证明业务质量。
 
-## 让开发代理参与
+## AI 代理技能
 
-两个随仓库提供的技能均可独立使用，可复制完整技能目录或让代理直接阅读其中的说明：
+[devflow-record](skills/devflow-record/SKILL.md) 用于保留一句话需求、拆解、真实动作与执行证据，生成本地监督包；[devflow-resolve](skills/devflow-resolve/SKILL.md) 用于核对反馈、补证或修复、复验和回写。两者均可独立使用，`gated-delivery` 是显式选择的可选研发适配。
 
-| 用途 | 入口 |
+Release 的技能包文件名为 `DevFlow-agent-skills-0.2.0-preview.1.zip`，保留完整技能目录及配套资料；宿主安装方式见 [接入指南](docs/agent-quickstart.md) 与 [问题处理指南](docs/agent-resolution.md)。客户端不会自动安装或调用技能。
+
+`DevFlowEvidence` 当前需从源码构建，应用 ZIP 和技能 ZIP 均不包含此 CLI 二进制。它提供只读 `contracts` 和 `inspect`，具体步骤见 [证据工具指南](docs/agent-quickstart.md#获取实际可用的证据工具)。
+
+## 版本对应
+
+| 用途 | 版本或分支 | 说明 |
+| --- | --- | --- |
+| 集成开发 | `main` | 持续变化，不等同于某个已发布包 |
+| 0.2 系列维护 | `codex/release/0.2` | 维护该系列的预览修复 |
+| 首个 GitHub Release/tag | `v0.2.0-preview.1` | Pre-release，固定 tag 对应精确源码提交 |
+| 发布资产版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.1` | 用于预览资产命名和 tag |
+| App 数字版本 | [VERSION](VERSION)：`0.2.0` | macOS 应用内显示的数字版本 |
+| 早期本地研发 | `0.1.0`、`0.1.1` | 保留更新历史，不补造 GitHub Release/tag |
+
+Tag 创建后不移动；新产物或修复使用新预览版本。分支、tag、资产和核验方式见 [版本规则](docs/VERSIONING.md)。
+
+## 文档地图
+
+| 需要什么 | 文档 |
 | --- | --- |
-| 从一句话需求记录原话、拆解、真实动作与执行证据，生成本地监督包 | [接入指南](docs/agent-quickstart.md) · [devflow-record](skills/devflow-record/SKILL.md) |
-| 核对 DevFlow 反馈，补证据或修复，真实复验并回写已有包 | [问题处理指南](docs/agent-resolution.md) · [devflow-resolve](skills/devflow-resolve/SKILL.md) |
-
-`gated-delivery` 是用户或环境显式选择的可选研发适配，不是运行 DevFlow 或使用这两个技能的前置依赖。技能文件不会自动安装到其他代理，客户端也不会自动调用技能、发送任务或启动后台工作。
-
-`DevFlowEvidence` 当前通过本仓库源码构建，提供只读的 `contracts` 与 `inspect`；预览 ZIP 不附带该 CLI。构建和使用方式见 [证据工具指南](docs/agent-quickstart.md#获取实际可用的证据工具)。`inspect` 退出 0 只表示报告生成成功，仍要读取具体状态、有效通过标记和警告。
-
-## 数据与分发
-
-默认工作区在 `~/Library/Application Support/DevFlow/workspace.json`，前一版备份保存在同目录。可通过 `--workspace` 指定隔离工作区；原工作区损坏时拒绝静默覆盖。导出 JSON 包含原文摘录，分享前应检查具体内容，详见 [隐私说明](docs/PRIVACY.md)。
-
-本地预览打包命令为 `LC_ALL=C bash scripts/package-preview.sh`，生成应用 ZIP、说明和 SHA-256，已有同名输出时拒绝覆盖。应用包不含用户工作区或原项目目录。当前没有 Developer ID 发行签名、Apple 公证、自动升级或独立下载环境的完整验证；源码托管与应用正式发行是不同事项。
-
-更多资料：[产品范围](docs/PRODUCT.md) · [路线与验收](docs/ROADMAP.md) · [试用与分发](docs/RELEASE.md) · [更新记录](docs/CHANGELOG.md) · [监督协议](docs/supervision-protocol.md) · [贡献指南](CONTRIBUTING.md) · [许可证](LICENSE)。
+| 下载、安装、首次使用、备份、升级、卸载及常见问题 | [用户指南](docs/USER_GUIDE.md) |
+| 当前版本的内容、资产和限制 | [v0.2.0-preview.1 发布说明](docs/releases/v0.2.0-preview.1.md) |
+| 构建、打包、检查与分发条件 | [发布指南](docs/RELEASE.md) |
+| 版本、分支、tag 与更新历史 | [版本规则](docs/VERSIONING.md) · [更新记录](docs/CHANGELOG.md) |
+| 功能与后续范围 | [产品](docs/PRODUCT.md) · [路线与验收](docs/ROADMAP.md) |
+| AI 技能与数据协议 | [接入指南](docs/agent-quickstart.md) · [问题处理](docs/agent-resolution.md) · [监督协议](docs/supervision-protocol.md) |
+| 数据、安全、贡献与许可 | [隐私](docs/PRIVACY.md) · [安全](SECURITY.md) · [贡献](CONTRIBUTING.md) · [许可证](LICENSE) |

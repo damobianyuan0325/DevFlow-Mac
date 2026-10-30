@@ -6,7 +6,7 @@
 
 ## 包与身份
 
-外层为`{schemaVersion: 2, name, records, supervision}`；`records`仍使用ActivityRecord，`supervision`为`SupervisionPlan`，内部`schemaVersion`为1。原schemaVersion=1资料继续作为普通历史资料读取。精确字段及枚举见 [Supervision.swift](../Sources/DevFlowCore/Supervision.swift) 和 [Models.swift](../Sources/DevFlowCore/Models.swift)。
+外层为`{schemaVersion: 2, name, records, supervision}`；`records`仍使用ActivityRecord，`supervision`为`SupervisionPlan`，内部`schemaVersion`为1。原schemaVersion=1资料继续作为普通历史资料读取。精确字段及枚举见 [Supervision.swift](https://github.com/damobianyuan0325/DevFlow/blob/v0.2.0-preview.1/Sources/DevFlowCore/Supervision.swift) 和 [Models.swift](https://github.com/damobianyuan0325/DevFlow/blob/v0.2.0-preview.1/Sources/DevFlowCore/Models.swift)。
 
 监督计划包括`title`、`version`、`originalRequest`、`assumptions`、`scope`和以下数组。所有监督对象ID全局唯一且稳定，版本更新追加真实执行，不更换ID掩盖原失败；动作记录使用自己的稳定ID。语义台账使用 R/A/U/T/E 分别表示需求、验收、研发任务、检查设计、实际执行。数组即使为空也应保留；可选字段未知时使用 null 或省略，不写猜测值。
 

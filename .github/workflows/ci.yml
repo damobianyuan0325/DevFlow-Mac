@@ -36,6 +36,21 @@ jobs:
           sw_vers
           swift --version
           python3 --version
+      - name: Check release version and tag
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          base = Path("VERSION").read_text().strip()
+          release = Path("REL_VERSION").read_text().strip()
+          assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", base), "Invalid VERSION"
+          assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-preview\.[1-9][0-9]*)?", release), "Invalid REL_VERSION"
+          assert release.split("-")[0] == base, "Release and app versions differ"
+          ref = os.environ.get("GITHUB_REF", "")
+          if ref.startswith("refs/tags/"):
+              assert ref == "refs/tags/v" + release, "Tag and source release version differ"
+          print("App:", base, "Release:", release)
+          PY
       - name: Build Swift targets
         run: swift build --disable-sandbox --scratch-path "$PWD/.build" --cache-path "$PWD/.build/cache"
       - name: Run core checks
