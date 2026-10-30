@@ -4,6 +4,16 @@
 
 **当前 GitHub 预发布版本：`v0.2.0-preview.2`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。仓库保持 **Private**，访问源码和 Release 需要获得仓库授权。
 
+## 把仓库链接交给 AI
+
+可以把下面这句话直接发给你的开发智能体：
+
+> 请阅读 https://github.com/damobianyuan0325/DevFlow 的 README 和 AGENT_INSTALL.md，帮我安装 DevFlow，并把我指定的项目接入研发过程监督。先检查你能访问的环境和现有安装，按文档选择同一发布版本，保留已有项目记录；需要我在 Mac 上操作的步骤请明确告诉我。
+
+AI 的统一入口是 [AGENT_INSTALL.md](AGENT_INSTALL.md)：先判断运行环境，再选择安装包或完整技能，生成项目资料并核对结果。已经安装 App 的用户，也可以从 DevFlow 菜单复制实际的本机接入路径。云端 AI 可以准备接入资料，但不能仅凭链接操作你的 Mac。
+
+仓库当前仍为 **Private**，AI 需要具备仓库访问权限；不能访问时，可提供下载好的技能 ZIP 或本地仓库。将来公开后可直接读取公开链接，公开时间另行决定。
+
 ## 开始使用
 
 无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2) 取得 `DevFlow-0.2.0-preview.2-macOS-arm64.dmg`，按 [用户指南](docs/USER_GUIDE.md) 打开 DMG 并将 `DevFlow.app` 复制到“应用程序”。资产实际可用情况以 Release 页为准；未授权或尚未发布时该链接可能不可访问。
