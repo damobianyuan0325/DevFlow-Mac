@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">DevFlow</title>
+  <desc id="desc">An open D-shaped process path joins an origin point to an evidence ring on a deep green macOS tile.</desc>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#174A40"/>
+      <stop offset="0.56" stop-color="#0C322E"/>
+      <stop offset="1" stop-color="#082321"/>
+    </linearGradient>
+    <linearGradient id="route" x1="0" y1="0" x2="0.8" y2="1">
+      <stop stop-color="#D9FBE7"/>
+      <stop offset="0.46" stop-color="#91EBCB"/>
+      <stop offset="1" stop-color="#42CFA7"/>
+    </linearGradient>
+    <radialGradient id="bloom" cx="0.26" cy="0.1" r="0.84">
+      <stop stop-color="#68D5AA" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#68D5AA" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="17" flood-color="#001511" flood-opacity="0.22"/>
+    </filter>
+    <filter id="route-shadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#001B15" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect x="96" y="96" width="832" height="832" rx="188" fill="url(#tile)" filter="url(#shadow)"/>
+  <rect x="96" y="96" width="832" height="832" rx="188" fill="url(#bloom)"/>
+  <rect x="98" y="98" width="828" height="828" rx="186" fill="none" stroke="#A8E7CB" stroke-opacity="0.16" stroke-width="2"/>
+  <g filter="url(#route-shadow)">
+    <path d="M 326 310 H 508 C 648 310 722 398 722 512 C 722 626 648 714 508 714 H 350 C 336.745 714 326 703.255 326 690 V 536 C 326 522.745 336.745 512 350 512 H 542" fill="none" stroke="url(#route)" stroke-width="74" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="326" cy="310" r="49" fill="#D9FBE7"/>
+    <circle cx="550" cy="512" r="58" fill="#0C342E" stroke="#C0F6DD" stroke-width="19"/>
+  </g>
+</svg>

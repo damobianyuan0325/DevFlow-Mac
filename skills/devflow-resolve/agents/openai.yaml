@@ -1,0 +1,4 @@
+interface:
+  display_name: "DevFlow 问题处理"
+  short_description: "把研发监督中的缺证、过期和失败变成可验证的处理任务，支持独立使用或选配研发技能"
+  default_prompt: "使用 $devflow-resolve 核对 DevFlow 中的问题，在当前授权内补充或修复并复验；按可用能力独立工作或选配研发技能。"

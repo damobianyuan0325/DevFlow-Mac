@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "development": {
+    "adapter": "standalone",
+    "skillPath": null
+  }
+}

@@ -1,0 +1,55 @@
+name: 缺陷报告
+description: 使用合成资料提供可复现的问题。
+title: '[Bug] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请只使用合成或有权分享的最小复现资料。不要贴真实凭据、会话 JSONL、用户工作区、私人项目原文、个人路径或未脱敏截图。
+        涉及安全边界的问题请按仓库 SECURITY.md 私下报告，不要在此披露敏感细节。
+  - type: input
+    id: version
+    attributes:
+      label: DevFlow 版本或提交
+      placeholder: 版本号或提交 SHA；未知请写未知
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 系统与工具链
+      description: 填写 macOS 版本、Apple Silicon 或 Intel；源码构建时补充 Swift 和 Python 版本。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 合成复现步骤
+      description: 给出从打开应用或运行检查开始的最少步骤；如需输入，使用合成的最小样例。
+      placeholder: |
+        1. 使用合成资料……
+        2. 执行操作……
+        3. 观察……
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+      description: 描述可观察的预期行为。
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 描述实际看到的结果；只附经过检查和脱敏的简短错误或截图。
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 资料检查
+      options:
+        - label: 我已检查本报告和附件，未包含真实凭据、私人会话、工作区或未经授权的资料。
+          required: true

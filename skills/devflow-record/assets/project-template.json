@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "name": "填写实际项目名称",
+  "records": [],
+  "supervision": {
+    "schemaVersion": 1,
+    "title": "填写实际监督范围",
+    "version": "填写候选版本",
+    "originalRequest": "逐字保留用户本次原话",
+    "assumptions": [],
+    "scope": [],
+    "requirements": [],
+    "criteria": [],
+    "tasks": [],
+    "testCases": [],
+    "executions": [],
+    "issues": [],
+    "artifacts": []
+  }
+}

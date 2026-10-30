@@ -1,0 +1,23 @@
+.build/
+.swiftpm/
+dist/
+.DS_Store
+evidence/
+local-only/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+
+# Private dogfooding inputs and raw development history stay on this machine.
+/devflow-history.json
+/devflow-supervision.json
+/docs/SHARING.md
+/docs/DEVLOG.md
+/docs/HANDOFF.md
+/docs/ACCEPTANCE.md
+/docs/DECISIONS.md
+/docs/research/
+/docs/requirements/
+/docs/reviews/

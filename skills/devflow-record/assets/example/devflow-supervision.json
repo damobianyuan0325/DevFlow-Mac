@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 2,
+  "name": "DevFlow 接入教学 · 标签整理",
+  "records": [
+    {
+      "id": "rec-demo-request",
+      "kind": "requirement",
+      "title": "教学例子：整理标签",
+      "summary": "保留示例原话并拆为一个组件验收；还没有执行证据。",
+      "status": "recorded",
+      "origin": "document",
+      "source": {"path": "requirements.md", "excerpt": "示例原话：把用户输入的标签去掉首尾空白；空标签要报错。"},
+      "relatedIDs": [],
+      "limitations": ["仅为接入教学，不代表用户项目通过；文档创建时间不作需求事件时间。"],
+      "action": {"kind": "request"}
+    }
+  ],
+  "supervision": {
+    "schemaVersion": 1,
+    "title": "标签整理组件的最小监督链",
+    "version": "demo-1",
+    "originalRequest": "把用户输入的标签去掉首尾空白；空标签要报错。",
+    "assumptions": ["输入为字符串；不改字符串内部空白。"],
+    "scope": ["仅验证 Python 组件行为"],
+    "requirements": [{
+      "id": "R-demo", "title": "整理标签", "originalText": "把用户输入的标签去掉首尾空白；空标签要报错。",
+      "details": "strip 首尾空白，空结果抛 ValueError，保持中间字符。",
+      "assumptions": ["输入为字符串"], "scope": ["normalize_label"], "outOfScope": ["页面、存储、原生交互与发布"], "recordIDs": ["rec-demo-request"]
+    }],
+    "criteria": [{
+      "id": "A-demo", "requirementID": "R-demo", "title": "标签符合三个明确边界",
+      "expected": "首尾空白去除；内部空白和普通文本保留；全空白抛 ValueError。",
+      "requiredLevel": "unit", "sourcePaths": ["feature.py"]
+    }],
+    "tasks": [{
+      "id": "U-demo", "title": "实现并检查标签整理", "criterionIDs": ["A-demo"], "status": "planned", "recordIDs": []
+    }],
+    "testCases": [{
+      "id": "T-demo", "title": "三个标签组件检查", "criterionIDs": ["A-demo"], "taskIDs": ["U-demo"],
+      "input": "带首尾空白且有内部空格的字符串、普通文本、全空白字符串。",
+      "expected": "分别得到 a  b、DevFlow、ValueError；三个实际 unittest 方法通过，无跳过。",
+      "level": "unit", "sourcePaths": ["feature.py", "checks.py"], "minimumPassed": 3
+    }],
+    "executions": [],
+    "issues": [],
+    "artifacts": []
+  }
+}

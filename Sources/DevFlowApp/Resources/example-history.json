@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "name": "教学样例 · 导出功能复盘（合成数据）",
+  "records": [
+    {
+      "id": "example-r1",
+      "kind": "requirement",
+      "title": "用清晰证据判断导出是否完成",
+      "summary": "需求：示例笔记工具可以导出一份 UTF-8 文本，取消操作不得留下半成品。",
+      "status": "recorded",
+      "occurredAt": null,
+      "version": null,
+      "origin": "document",
+      "source": {
+        "path": "example-notes.md",
+        "line": 6,
+        "excerpt": "需求：示例笔记工具可以导出一份 UTF-8 文本，取消操作不得留下半成品。",
+        "digest": "8aa54a7a9c34f3bbb99532987f5b5cabf5b6b545c4919475ae49055a2b0a51d7"
+      },
+      "relatedIDs": [],
+      "limitations": [
+        "合成教学材料，不是真实执行或验收结果。",
+        "仅演示历史、失败与未验范围的展示；不证明任何项目能力。"
+      ]
+    },
+    {
+      "id": "example-u1",
+      "kind": "development",
+      "title": "接通示例导出入口",
+      "summary": "研发：示例叙事中已接通导出入口，但代码存在本身不能证明用户操作成功。",
+      "status": "recorded",
+      "occurredAt": null,
+      "version": null,
+      "origin": "document",
+      "source": {
+        "path": "example-notes.md",
+        "line": 7,
+        "excerpt": "研发：示例叙事中已接通导出入口，但代码存在本身不能证明用户操作成功。",
+        "digest": "8aa54a7a9c34f3bbb99532987f5b5cabf5b6b545c4919475ae49055a2b0a51d7"
+      },
+      "relatedIDs": [
+        "example-r1"
+      ],
+      "limitations": [
+        "合成教学材料，不是真实执行或验收结果。",
+        "仅演示历史、失败与未验范围的展示；不证明任何项目能力。"
+      ]
+    },
+    {
+      "id": "example-t1",
+      "kind": "test",
+      "title": "首次检查发现取消后的临时文件",
+      "summary": "测试：在合成情景中，取消导出后仍留有临时文件；保留失败记录。",
+      "status": "failed",
+      "occurredAt": null,
+      "version": null,
+      "origin": "document",
+      "source": {
+        "path": "example-notes.md",
+        "line": 8,
+        "excerpt": "测试：在合成情景中，取消导出后仍留有临时文件；保留失败记录。",
+        "digest": "8aa54a7a9c34f3bbb99532987f5b5cabf5b6b545c4919475ae49055a2b0a51d7"
+      },
+      "relatedIDs": [
+        "example-u1"
+      ],
+      "limitations": [
+        "合成教学材料，不是真实执行或验收结果。",
+        "仅演示历史、失败与未验范围的展示；不证明任何项目能力。"
+      ]
+    },
+    {
+      "id": "example-d1",
+      "kind": "bug",
+      "title": "取消后残留文件需要处理",
+      "summary": "缺陷：合成情景的取消清理问题尚未获得有效复测，仍保持未关闭。",
+      "status": "open",
+      "occurredAt": null,
+      "version": null,
+      "origin": "document",
+      "source": {
+        "path": "example-notes.md",
+        "line": 9,
+        "excerpt": "缺陷：合成情景的取消清理问题尚未获得有效复测，仍保持未关闭。",
+        "digest": "8aa54a7a9c34f3bbb99532987f5b5cabf5b6b545c4919475ae49055a2b0a51d7"
+      },
+      "relatedIDs": [
+        "example-t1"
+      ],
+      "limitations": [
+        "合成教学材料，不是真实执行或验收结果。",
+        "仅演示历史、失败与未验范围的展示；不证明任何项目能力。"
+      ]
+    },
+    {
+      "id": "example-c1",
+      "kind": "decision",
+      "title": "修复声明与真实复测分别记录",
+      "summary": "决策：记录修复声明，但不把声明当作复测通过；失败历史不删除。",
+      "status": "recorded",
+      "occurredAt": null,
+      "version": null,
+      "origin": "document",
+      "source": {
+        "path": "example-notes.md",
+        "line": 10,
+        "excerpt": "决策：记录修复声明，但不把声明当作复测通过；失败历史不删除。",
+        "digest": "8aa54a7a9c34f3bbb99532987f5b5cabf5b6b545c4919475ae49055a2b0a51d7"
+      },
+      "relatedIDs": [
+        "example-d1"
+      ],
+      "limitations": [
+        "合成教学材料，不是真实执行或验收结果。",
+        "仅演示历史、失败与未验范围的展示；不证明任何项目能力。"
+      ]
+    },
+    {
+      "id": "example-v1",
+      "kind": "delivery",
+      "title": "真实操作验收等待执行",
+      "summary": "交付：示例尚未执行真实界面验收，不能宣布整体交付完成。",
+      "status": "notRun",
+      "occurredAt": null,
+      "version": null,
+      "origin": "document",
+      "source": {
+        "path": "example-notes.md",
+        "line": 11,
+        "excerpt": "交付：示例尚未执行真实界面验收，不能宣布整体交付完成。",
+        "digest": "8aa54a7a9c34f3bbb99532987f5b5cabf5b6b545c4919475ae49055a2b0a51d7"
+      },
+      "relatedIDs": [
+        "example-r1",
+        "example-d1"
+      ],
+      "limitations": [
+        "合成教学材料，不是真实执行或验收结果。",
+        "仅演示历史、失败与未验范围的展示；不证明任何项目能力。"
+      ]
+    }
+  ]
+}
