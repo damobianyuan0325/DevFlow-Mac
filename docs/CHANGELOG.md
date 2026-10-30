@@ -1,12 +1,17 @@
 # DevFlow 更新记录
 
+## 2026-10-30 · 项目公开开源
+
+仓库切换为 Public，采用 MIT 许可证；源码、完整技能及现有 Release 附件可公开访问。更新 README、AI 安装入口、用户指南和发布说明。App 版本与固定 tag 不变，不重打或替换旧版安装包；旧包内提及 Private/需授权的文字反映打包时状态，当前访问方式以仓库首页和 Release 页为准。开源不等于 Apple 公证，免费预览版首次启动限制保持不变。
+
+
 ## 0.2.0-preview.2
 
 DMG安装交付；App内置双技能、离线说明和CLI；新增菜单发现入口。preview.1保留，不覆盖旧资产。
 
 ## v0.2.0-preview.1 · 首个 GitHub 预发布
 
-首个 GitHub Release 使用 `v0.2.0-preview.1`，App 数字版本 `0.2.0`，仓库保持 Private，发布类型为 pre-release。资产是否已发布以 [固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.1) 为准；范围与限制见 [本版说明](releases/v0.2.0-preview.1.md)。源码和脚本可供独立构建，检查结果须对应实际使用的源码，不沿用旧版本通过结论。
+首个 GitHub Release 使用 `v0.2.0-preview.1`，App 数字版本 `0.2.0`，当时仓库为 Private，发布类型为 pre-release。资产是否已发布以 [固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.1) 为准；范围与限制见 [本版说明](releases/v0.2.0-preview.1.md)。源码和脚本可供独立构建，检查结果须对应实际使用的源码，不沿用旧版本通过结论。
 
 - 支持 schemaVersion=2 监督包，在原记录上组织需求、验收、任务、用例、执行、问题与产物；schemaVersion=1 历史资料继续支持。
 - 每个项目可手动关联最多 8 个 Codex 会话，公开动作与语义资料在同一项目回查；不扫描全部私有对话，未接入内容保留覆盖边界。

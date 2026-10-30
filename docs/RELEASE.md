@@ -1,8 +1,10 @@
 # 构建、打包与发布指南
 
-当前 GitHub 预发布标识为 **`v0.2.0-preview.2`**，App 数字版本为 **`0.2.0`**。仓库保持 Private，下载需要仓库授权。应用采用 ad-hoc 本地签名，尚无 Developer ID 发行签名或 Apple 公证；GitHub pre-release 不等于稳定版或已公证分发。
+当前 GitHub 预发布标识为 **`v0.2.0-preview.2`**，App 数字版本为 **`0.2.0`**。仓库现以 MIT 许可证公开，源码、技能和安装包可直接访问，无需申请仓库权限。应用采用 ad-hoc 本地签名，尚无 Developer ID 发行签名或 Apple 公证；GitHub pre-release 不等于稳定版或已公证分发。
 
 只需安装应用的使用者先读 [用户指南](USER_GUIDE.md)。本文件补充下载核验、源码构建、打包内容及维护者的发布检查；实际资产是否已上传以 [固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2) 为准。
+
+2026-10-30 项目转为公开开源。既有 preview.1/preview.2 的 tag 和附件保持原字节，因此包内可能仍有“Private/需授权”的旧说明；这不再是下载条件。当前获取方式见仓库首页和 Release 页，功能及技能契约仍按对应版本读取。
 
 ## 下载内容
 
@@ -90,7 +92,7 @@ shasum -a 256 -c SHA256SUMS.txt
 
 ## 版本与发布对应
 
-`main` 用于集成，`codex/release/0.2` 维护 0.2 系列，固定 tag `v0.2.0-preview.2` 对应精确发布提交。本次 Release 必须标记 pre-release，仓库继续保持 Private。规则见 [版本管理](VERSIONING.md)，内容说明见 [本版发布说明](releases/v0.2.0-preview.2.md)。
+`main` 用于集成，`codex/release/0.2` 维护 0.2 系列，固定 tag `v0.2.0-preview.2` 对应精确发布提交。当前版本继续标记 pre-release，仓库现为 Public；开源不改变预览版的签名与验收边界。规则见 [版本管理](VERSIONING.md)，内容说明见 [本版发布说明](releases/v0.2.0-preview.2.md)。
 
 维护者在上传前需要分别核对：
 
@@ -101,7 +103,7 @@ shasum -a 256 -c SHA256SUMS.txt
 | 原生应用 | 主要导入、来源查看、历史、监督、反馈、刷新与重启路径；没有执行就注明 |
 | 包内容 | DMG 内 App 与技能 ZIP 的明确白名单、链接、完整技能、无私人数据，解包后文件与输入相符 |
 | 签名与架构 | 当前 arm64 App 的 ad-hoc 完整性；不能写成 Developer ID 或公证通过 |
-| 上传与下载 | 远端保持 Private、Release 是 pre-release、tag/资产名和摘要匹配；上传成功单独记录 |
+| 上传与下载 | 远端 Public 且无需认证即可读取/下载，Release 是 pre-release，tag/资产名和摘要匹配；上传成功单独记录 |
 
 发布说明中的检查范围不是通过证明。应在实际运行后填写结果，保留失败和限制；不能以旧版本通过、检查条数或上传成功替代当前验收。Tag 一旦交付不移动，不以同名资产覆盖修复问题；需要改动时发布新预览序号。
 

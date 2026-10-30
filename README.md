@@ -2,7 +2,7 @@
 
 原生 macOS 项目过程管理与监督客户端。把 AI 辅助开发中的需求、研发、测试、缺陷、决策和交付关联起来，让已有历史与持续新增记录都能回查。
 
-**当前 GitHub 预发布版本：`v0.2.0-preview.2`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。仓库保持 **Private**，访问源码和 Release 需要获得仓库授权。
+**当前 GitHub 预发布版本：`v0.2.0-preview.2`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。本项目采用 **[MIT 许可证](LICENSE) 开源**，源码、技能和 Release 安装包均可公开获取，无需申请仓库访问权限。
 
 ## 把仓库链接交给 AI
 
@@ -12,11 +12,11 @@
 
 AI 的统一入口是 [AGENT_INSTALL.md](AGENT_INSTALL.md)：先判断运行环境，再选择安装包或完整技能，生成项目资料并核对结果。已经安装 App 的用户，也可以从 DevFlow 菜单复制实际的本机接入路径。云端 AI 可以准备接入资料，但不能仅凭链接操作你的 Mac。
 
-仓库当前仍为 **Private**，AI 需要具备仓库访问权限；不能访问时，可提供下载好的技能 ZIP 或本地仓库。将来公开后可直接读取公开链接，公开时间另行决定。
+仓库现已公开，可直接把链接交给支持浏览或读取 GitHub 的 AI。若代理受网络或工具限制无法读取，可提供完整技能 ZIP 或本地仓库；不需要为本项目提供 GitHub 密码或访问令牌。
 
 ## 开始使用
 
-无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2) 取得 `DevFlow-0.2.0-preview.2-macOS-arm64.dmg`，按 [用户指南](docs/USER_GUIDE.md) 打开 DMG 并将 `DevFlow.app` 复制到“应用程序”。资产实际可用情况以 Release 页为准；未授权或尚未发布时该链接可能不可访问。
+无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2) 取得 `DevFlow-0.2.0-preview.2-macOS-arm64.dmg`，按 [用户指南](docs/USER_GUIDE.md) 打开 DMG 并将 `DevFlow.app` 复制到“应用程序”。下载无需申请权限；文件名与摘要以对应 Release 页为准。
 
 首次启动可能受到 macOS 对未公证应用的限制，不能保证下载后直接打开。免费预览版无需购买 Apple 开发者会员。确认来源及摘要后，可按用户指南使用系统“仍要打开”对单个应用放行；无需关闭全局系统安全保护。
 

@@ -6,7 +6,7 @@ DevFlow 在本机只读查看你选择的资料，不调用外部模型、不自
 
 ## 下载与安装
 
-1. 使用已获授权的 GitHub 账号打开 [v0.2.0-preview.2 固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2)。仓库保持 Private；页面不存在或无权访问时，先确认账号权限和该预发布是否已发布。
+1. 打开 [v0.2.0-preview.2 固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2)。仓库已开源，浏览源码和下载本版无需登录或申请访问权限；若页面无法访问，核对链接和网络。
 2. 在 Assets 中下载 `DevFlow-0.2.0-preview.2-macOS-arm64.dmg`。它是应用包，不是 GitHub 自动提供的 Source code 源码归档。运行已构建的应用本身不需要 Swift 工具链。
 3. 一并下载 `SHA256SUMS.txt`，按 [发布指南](RELEASE.md#检查下载文件) 核对文件。若只下载应用包，核对清单中对应这一行即可；App内已包含双技能；独立技能ZIP是可选下载。
 4. 双击 DMG 打开安装卷，将其中的 `DevFlow.app` 复制到 Finder 的“应用程序”（Applications）目录。如果要替换旧版，先退出应用并按下文备份工作区。
@@ -100,7 +100,7 @@ DevFlow 不扫描其他聊天。它提取当前格式支持的公开需求、进
 
 | 现象 | 核对方式 |
 | --- | --- |
-| Release 页 404 或看不到 Assets | 检查是否登录有权限的账号，以及该预发布是否已经发布；私有仓库不向未授权用户提供下载 |
+| Release 页 404 或看不到 Assets | 核对版本链接、网络及 Release 状态；公开下载无需申请仓库权限，不要向他人提供账号密码 |
 | 下载后 macOS 不允许启动 | 本版尚未正式签名和公证；确认来源及摘要后按上方单应用“仍要打开”步骤处理；不关闭全局系统保护 |
 | 没有“监督工作台” | 当前可能是普通 Markdown、schemaVersion=1 或单会话项目；要有符合协议的 schemaVersion=2 监督计划 |
 | 来源找不到或摘要不符 | 确认文件是否移动或修改，用“关联原始资料”重绑正确目录；旧执行身份不能改写成新文件身份 |
