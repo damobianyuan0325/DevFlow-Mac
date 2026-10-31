@@ -1,7 +1,5 @@
 # DevFlow
 
-官方源码与下载仓库现为 **[DevFlow-Mac](https://github.com/damobianyuan0325/DevFlow-Mac)**。App 仍叫 DevFlow；旧安装的工作区不变。旧仓库暂不可用，本仓库由本地已审核的开源历史和发布原件恢复，详见[版本规则](docs/VERSIONING.md)。
-
 原生 macOS 项目过程管理与监督客户端。把 AI 辅助开发中的需求、研发、测试、缺陷、决策和交付关联起来，让已有历史与持续新增记录都能回查。
 
 **当前 GitHub 预发布版本：`v0.2.0-preview.3`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。本项目采用 **[MIT 许可证](LICENSE) 开源**，源码、技能和 Release 安装包均可公开获取，无需申请仓库访问权限。
@@ -14,7 +12,7 @@
 
 AI 的统一入口是 [AGENT_INSTALL.md](AGENT_INSTALL.md)：先判断运行环境，再选择安装包或完整技能，生成项目资料并核对结果。已经安装 App 的用户，也可以从 DevFlow 菜单复制实际的本机接入路径。云端 AI 可以准备接入资料，但不能仅凭链接操作你的 Mac。
 
-仓库现已公开，可直接把链接交给支持浏览或读取 GitHub 的 AI。若代理受网络或工具限制无法读取，可提供完整技能 ZIP 或本地仓库；不需要为本项目提供 GitHub 密码或访问令牌。
+可直接把仓库链接交给支持浏览或读取 GitHub 的 AI。若代理受网络或工具限制无法读取，可提供完整技能 ZIP 或本地仓库；不需要为本项目提供 GitHub 密码或访问令牌。
 
 ## 开始使用
 
