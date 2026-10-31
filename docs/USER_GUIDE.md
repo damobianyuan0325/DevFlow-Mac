@@ -1,16 +1,16 @@
 # DevFlow 用户指南
 
-适用于 `v0.2.0-preview.2`（App 版本 `0.2.0`）。这是原生 macOS 预览版，当前下载包面向 Apple Silicon，最低构建目标 macOS 14。其他系统组合需要实际验证；不提供 Intel 或 Universal 下载包。
+适用于 `v0.2.0-preview.3`（App 版本 `0.2.0`）。这是原生 macOS 预览版，当前下载包面向 Apple Silicon，最低构建目标 macOS 14。其他系统组合需要实际验证；不提供 Intel 或 Universal 下载包。
 
 DevFlow 在本机只读查看你选择的资料，不调用外部模型、不自动执行导入内容，也不向开发代理发送消息。先用合成教学样本熟悉界面，再导入自己的项目。
 
 ## 下载与安装
 
-1. 打开 [v0.2.0-preview.2 固定 Release 页](https://github.com/damobianyuan0325/DevFlow/releases/tag/v0.2.0-preview.2)。仓库已开源，浏览源码和下载本版无需登录或申请访问权限；若页面无法访问，核对链接和网络。
-2. 在 Assets 中下载 `DevFlow-0.2.0-preview.2-macOS-arm64.dmg`。它是应用包，不是 GitHub 自动提供的 Source code 源码归档。运行已构建的应用本身不需要 Swift 工具链。
+1. 打开 [v0.2.0-preview.3 固定 Release 页](https://github.com/damobianyuan0325/DevFlow-Mac/releases/tag/v0.2.0-preview.3)。仓库已开源，浏览源码和下载本版无需登录或申请访问权限；若页面无法访问，核对链接和网络。
+2. 在 Assets 中下载 `DevFlow-0.2.0-preview.3-macOS-arm64.dmg`。它是应用包，不是 GitHub 自动提供的 Source code 源码归档。运行已构建的应用本身不需要 Swift 工具链。
 3. 一并下载 `SHA256SUMS.txt`，按 [发布指南](RELEASE.md#检查下载文件) 核对文件。若只下载应用包，核对清单中对应这一行即可；App内已包含双技能；独立技能ZIP是可选下载。
 4. 双击 DMG 打开安装卷，将其中的 `DevFlow.app` 复制到 Finder 的“应用程序”（Applications）目录。如果要替换旧版，先退出应用并按下文备份工作区。
-5. 弹出安装卷，从“应用程序”打开 DevFlow。在应用菜单“关于 DevFlow”核对预览版本 `0.2.0-preview.2`；首次可选择首页“先看看教学复盘样本”，无需导入私人资料即可开始浏览。
+5. 弹出安装卷，从“应用程序”打开 DevFlow。在应用菜单“关于 DevFlow”核对预览版本 `0.2.0-preview.3`；首次可选择首页“先看看教学复盘样本”，无需导入私人资料即可开始浏览。
 
 当前应用只有 ad-hoc 本地签名，**没有 Developer ID 发行签名或 Apple 公证**，安装和使用本预览版不要求购买 Apple 开发者会员。下载后首次启动可能被 macOS 限制。
 
@@ -112,7 +112,7 @@ DevFlow 不扫描其他聊天。它提取当前格式支持的公开需求、进
 
 ## 给 AI 代理接入
 
-应用 DMG 中的 App 已内置完整 `skills/`；也可单独下载 `DevFlow-agent-skills-0.2.0-preview.2.zip`，或使用同 tag 源码中的 `skills/`。必须保留每个技能目录内的相对文件，不能只复制 SKILL.md；按宿主规则选择技能，或让代理直接阅读完整说明。
+应用 DMG 中的 App 已内置完整 `skills/`；也可单独下载 `DevFlow-agent-skills-0.2.0-preview.3.zip`，或使用同 tag 源码中的 `skills/`。必须保留每个技能目录内的相对文件，不能只复制 SKILL.md；按宿主规则选择技能，或让代理直接阅读完整说明。
 
 - [devflow-record 与接入指南](agent-quickstart.md)：从一句话需求留下拆解、任务、真实动作和测试证据。
 - [devflow-resolve 与问题处理指南](agent-resolution.md)：核对反馈，补证或修复，复验并回写。

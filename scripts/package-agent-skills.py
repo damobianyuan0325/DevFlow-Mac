@@ -40,7 +40,7 @@ SKILL_FILES = (
 PUBLIC_FILES = (
     "LICENSE", "README.md", "AGENT_INSTALL.md", "CONTRIBUTING.md", "SECURITY.md", "VERSION", "REL_VERSION",
     "docs/USER_GUIDE.md", "docs/PRIVACY.md", "docs/CHANGELOG.md", "docs/RELEASE.md",
-    "docs/releases/v0.2.0-preview.1.md",
+    "docs/releases/v0.2.0-preview.1.md", "docs/releases/v0.2.0-preview.2.md",
     "docs/VERSIONING.md", "docs/agent-quickstart.md", "docs/agent-resolution.md",
     "docs/supervision-protocol.md", "docs/PRODUCT.md", "docs/ROADMAP.md", "docs/BRAND.md",
 )
