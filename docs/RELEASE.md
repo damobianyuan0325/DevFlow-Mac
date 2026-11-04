@@ -65,7 +65,7 @@ open -n dist/DevFlow.app --args --workspace "$PWD/.build/local-preview/workspace
 
 ## 本地打包
 
-先确认根目录版本文件：`VERSION` 为 `0.2.0`，`REL_VERSION` 为 `0.2.0-preview.3`。应用构建完成后，在已跟踪发布文件的仓库中执行：
+先确认根目录版本文件：`VERSION` 为 `0.2.0`，当前源码 `REL_VERSION` 为 `0.2.0-preview.4`。本节从源码打包的产物为 preview.4；上文下载示例仍为已发布的 preview.3。应用构建完成后，在已跟踪发布文件的仓库中执行：
 
 ```sh
 LC_ALL=C bash scripts/package-dmg.sh
@@ -81,8 +81,8 @@ App 打包只核验现有 arm64 应用及 ad-hoc 签名，不重新构建。两�
 ```sh
 cd dist
 shasum -a 256 \
-  DevFlow-0.2.0-preview.3-macOS-arm64.dmg \
-  DevFlow-agent-skills-0.2.0-preview.3.zip > SHA256SUMS.txt
+  DevFlow-0.2.0-preview.4-macOS-arm64.dmg \
+  DevFlow-agent-skills-0.2.0-preview.4.zip > SHA256SUMS.txt
 shasum -a 256 -c SHA256SUMS.txt
 ```
 

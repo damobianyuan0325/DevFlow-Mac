@@ -19,10 +19,11 @@ export CLANG_MODULE_CACHE_PATH="$PWD/.build/clang-module-cache"
 export SWIFTPM_MODULECACHE_OVERRIDE="$PWD/.build/swift-module-cache"
 swift build --disable-sandbox --scratch-path "$PWD/.build" --cache-path "$PWD/.build/cache"
 bash scripts/test.sh
+bash scripts/test-app-state.sh
 python3 -B -m unittest discover -s Tests/AgentSkills -v
 ```
 
-`scripts/test.sh` 运行独立的 `DevFlowChecks`，失败返回非零退出码。项目使用这个入口兼容缺少 XCTest 的 Command Line Tools 环境；不要用一次空的 `swift test` 结果替代核心检查。Python 检查只使用标准库，无需安装 PyYAML。
+`scripts/test.sh` 运行独立的 `DevFlowChecks`，失败返回非零退出码。项目使用这个入口兼容缺少 XCTest 的 Command Line Tools 环境；不要用一次空的 `swift test` 结果替代核心检查。`scripts/test-app-state.sh` 编译真实 AppStore，用受控延迟读取检查刷新、反馈、项目切换和迟到结果；它不替代原生连续刷新交互验收。Python 检查只使用标准库，无需安装 PyYAML。
 
 构建本地预览应用：
 

@@ -13,8 +13,14 @@ final class AppStore: ObservableObject {
     @Published var isImporting = false
     @Published var lastRefreshError: String?
     @Published var supervisionAssessment: SupervisionAssessment?
+    @Published private(set) var refreshingProjectID: UUID?
+    @Published private(set) var isAssessing = false
+    private var assessmentProjectID: UUID?
+    private let readProject: (Project) async -> ProjectRefresh
     private var assessmentGeneration = UUID()
     private let storage: WorkspaceStorage
+    private let saver: WorkspaceSaveQueue
+    private var terminationObserver: NSObjectProtocol?
     private var timer: Timer?
     private var persistenceBlocked = false
     var selectedProject: Project? { state.projects.first { $0.id == selectedProjectID } }
@@ -22,24 +28,31 @@ final class AppStore: ObservableObject {
     var isSelectedSession: Bool { selectedProject.map { URL(fileURLWithPath: $0.importPath).pathExtension.lowercased() == "jsonl" } ?? false }
     var isRefreshPaused: Bool { selectedProject?.refreshPaused == true }
 
-    init() {
+    init(workspaceURL: URL? = nil, automaticRefresh: Bool = true,
+         readProject: @escaping (Project) async -> ProjectRefresh = { project in
+             await Task.detached(priority: .utility) { ProjectSources.refresh(project) }.value
+         }) {
+        self.readProject = readProject
         let args = ProcessInfo.processInfo.arguments
         let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("DevFlow")
-        if let index = args.firstIndex(of: "--workspace"), args.indices.contains(index + 1) { storage = WorkspaceStorage(url: URL(fileURLWithPath: args[index + 1])) }
+        if let workspaceURL { storage = WorkspaceStorage(url: workspaceURL) }
+        else if let index = args.firstIndex(of: "--workspace"), args.indices.contains(index + 1) { storage = WorkspaceStorage(url: URL(fileURLWithPath: args[index + 1])) }
         else { storage = WorkspaceStorage(url: root.appendingPathComponent("workspace.json")) }
+        saver = WorkspaceSaveQueue(storage: storage)
+        terminationObserver = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [saver] _ in saver.flush() }
         do { state = try storage.load() } catch { persistenceBlocked = true; errorMessage = "工作区读取失败，原文件未修改：\(error.localizedDescription)" }
         selectedProjectID = state.projects.first(where: { $0.id == state.selectedProjectID })?.id ?? state.projects.first?.id
         lastRefreshError = selectedProject?.primarySourceError
-        timer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
+        if automaticRefresh { timer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
             Task { @MainActor in guard let self, NSApp.isActive, !self.isImporting, !self.isRefreshPaused, self.selectedProject?.isSample == false else { return }; self.refreshSelected(silent: true) }
-        }
+        } }
         if let index = args.firstIndex(of: "--import"), args.indices.contains(index + 1) {
             let url = URL(fileURLWithPath: args[index + 1]); Task { await importURL(url) }
         }
         updateAssessment()
     }
 
-    func selectProject(_ id: UUID) { selectedProjectID = id; selectedRecordID = nil; lastRefreshError = selectedProject?.primarySourceError; updateAssessment(); persist() }
+    func selectProject(_ id: UUID) { guard selectedProjectID != id else { return }; selectedProjectID = id; selectedRecordID = nil; lastRefreshError = selectedProject?.primarySourceError; updateAssessment(); persist() }
     func selectRecord(_ id: String) { selectedRecordID = id }
     func importProject() { presentImportPanel(sessionOnly: false) }
     func connectDevelopmentSession() { presentImportPanel(sessionOnly: true) }
@@ -98,20 +111,25 @@ final class AppStore: ObservableObject {
     }
     func refreshSelected() { refreshSelected(silent: false) }
     private func refreshSelected(silent: Bool) {
-        guard let project = selectedProject, !isImporting, !project.isSample else { return }
-        isImporting = true
+        guard let project = selectedProject, !isImporting, refreshingProjectID == nil, !project.isSample else { return }
+        refreshingProjectID = project.id
         Task {
-            defer { isImporting = false }
-            do {
-                let result = await Task.detached(priority: .utility) { ProjectSources.refresh(project) }.value
-                guard let index = state.projects.firstIndex(where: { $0.id == project.id }) else { return }
-                // Controls can change during I/O; never undo a user's pause.
-                let updated = ProjectSources.preservingControls(from: state.projects[index], in: result.project)
-                state.projects[index] = updated
-                if selectedProjectID == project.id { lastRefreshError = result.primaryError; updateAssessment() }
-                if !silent, let error = result.primaryError { errorMessage = error }
-                persist()
+            defer { refreshingProjectID = nil }
+            let result = await readProject(project)
+            guard !isImporting,
+                  let index = state.projects.firstIndex(where: { $0.id == project.id }),
+                  // A subsequent import or source edit wins over this earlier read.
+                  // Pause controls may change during I/O and are deliberately preserved.
+                  ProjectSources.preservingControls(from: project, in: state.projects[index]) == project else { return }
+            let updated = ProjectSources.preservingControls(from: state.projects[index], in: result.project)
+            if state.projects[index] != updated { state.projects[index] = updated }
+            if selectedProjectID == project.id {
+                if lastRefreshError != result.primaryError { lastRefreshError = result.primaryError }
+                // Always recheck files: an unchanged plan can reference changed evidence.
+                updateAssessment()
             }
+            if !silent, let error = result.primaryError { errorMessage = error }
+            persist()
         }
     }
     func openSource(_ record: ActivityRecord) {
@@ -223,12 +241,19 @@ final class AppStore: ObservableObject {
     }
     private func updateAssessment() {
         let generation = UUID(); assessmentGeneration = generation
-        guard let project = selectedProject, let plan = project.supervision else { supervisionAssessment = nil; return }
-        supervisionAssessment = nil
+        guard let project = selectedProject, let plan = project.supervision else {
+            assessmentProjectID = nil; supervisionAssessment = nil; isAssessing = false; return
+        }
+        if assessmentProjectID != project.id {
+            supervisionAssessment = nil
+            assessmentProjectID = project.id
+        }
+        isAssessing = true
         Task {
             let result = await Task.detached(priority: .utility) { SupervisionEvaluator.evaluate(plan: plan, root: project.sourceRoot, records: project.records) }.value
             guard assessmentGeneration == generation, selectedProjectID == project.id else { return }
-            supervisionAssessment = result
+            if supervisionAssessment != result { supervisionAssessment = result }
+            isAssessing = false
         }
     }
     func exportProject() {
@@ -239,9 +264,14 @@ final class AppStore: ObservableObject {
             catch { errorMessage = error.localizedDescription }
         }
     }
+    func flushPersistence() { saver.flush() }
+
     private func persist() {
-        state.selectedProjectID = selectedProjectID
+        if state.selectedProjectID != selectedProjectID { state.selectedProjectID = selectedProjectID }
         guard !persistenceBlocked else { errorMessage = "原工作区无法读取，本次操作仅暂存内存，未覆盖原文件。请先恢复工作区文件。"; return }
-        do { try storage.save(state) } catch { errorMessage = "保存失败：\(error.localizedDescription)" }
+        saver.save(state) { [weak self] error in
+            guard let error else { return }
+            Task { @MainActor [weak self] in self?.errorMessage = "保存失败：\(error)" }
+        }
     }
 }

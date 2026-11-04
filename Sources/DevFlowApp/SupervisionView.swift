@@ -77,7 +77,7 @@ struct SupervisionView: View {
                             .foregroundStyle(page == item ? DevFlowStyle.accent : Color.secondary)
                             .background(page == item ? DevFlowStyle.accent.opacity(0.1) : .clear, in: RoundedRectangle(cornerRadius: 8))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                     .accessibilityIdentifier("supervision.page.\(item.rawValue)")
                 }
             }
@@ -133,9 +133,11 @@ struct SupervisionView: View {
             }
             HStack(spacing: 8) {
                 Circle().fill(store.isRefreshPaused ? Color.orange : DevFlowStyle.accent).frame(width: 6, height: 6)
-                Text(store.isRefreshPaused ? "资料刷新已暂停 · Agent 的运行不受影响" : "选中此项目且应用在前台时，每 15 秒只读刷新")
+                Text(store.isRefreshPaused ? "资料刷新已暂停 · Agent 的运行不受影响" : "每 15 秒后台读取 · 保持当前页面和编辑")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
+                Text(store.isAssessing ? "后台核验中 · 暂保留上次结果" : " ")
+                    .font(.caption).foregroundStyle(.secondary)
                 Text("上次读取 \(project.refreshedAt.formatted(date: .abbreviated, time: .shortened))")
                     .font(.caption).foregroundStyle(.secondary)
             }
@@ -182,7 +184,7 @@ struct SupervisionView: View {
                 }
             }
             SectionCard(title: "过程与来源", symbol: "point.3.connected.trianglepath.dotted") {
-                Text("已载入 \(project.records.count) 条过程与历史记录，关联 \(sources.count) 个开发会话。记录数量不表示完成度。")
+                Text("当前主来源 \(project.primaryRecords?.count.description ?? "未知") 条；累计过程与历史 \(project.records.count) 条（含已保留的旧记录），关联 \(sources.count) 个开发会话。历史中的状态不代表现状；需求完成请看当前验收，记录数量不表示完成度。")
                     .font(.callout).foregroundStyle(.secondary)
                 HStack {
                     Button("查看来源与覆盖范围") { page = .sources }
@@ -204,13 +206,13 @@ struct SupervisionView: View {
                 }
             }
             if plan.requirements.isEmpty { emptyCard("尚未接入需求拆解", detail: "保留用户原话后，由开发过程补充需求与验收标准。") }
-            ForEach(plan.requirements.filter { focusedID == nil || $0.id == focusedID }) { requirement in
+            PagedItems(items: plan.requirements.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { requirement in
                 requirementCard(requirement)
             }
             if focusedID == nil || plan.tasks.contains(where: { $0.id == focusedID }) {
                 SectionCard(title: "工作任务 · U", symbol: "hammer") {
                     if plan.tasks.isEmpty { Text("尚未记录工作任务。").foregroundStyle(.secondary) }
-                    ForEach(plan.tasks.filter { focusedID == nil || $0.id == focusedID }) { task in
+                    PagedItems(items: plan.tasks.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { task in
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
                                 Text("\(task.id) · \(task.title)").font(.callout.weight(.medium))
@@ -243,7 +245,7 @@ struct SupervisionView: View {
                 Spacer()
                 feedbackButton(item.id)
             }
-            DisclosureGroup("拆解、假设与证据链") {
+            DeferredDisclosure("拆解、假设与证据链") {
                 VStack(alignment: .leading, spacing: 12) {
                     labeledLines("假设", item.assumptions, empty: "未记录，待核查")
                     labeledLines("范围", item.scope, empty: "未记录")
@@ -259,7 +261,7 @@ struct SupervisionView: View {
                                 Image(systemName: "arrow.up.right")
                             }.contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain).foregroundStyle(DevFlowStyle.accent)
+                        .buttonStyle(HandButtonStyle(base: PlainButtonStyle())).foregroundStyle(DevFlowStyle.accent)
                         .accessibilityIdentifier("supervision.link.\(item.id).\(criterion.id)")
                         Text(criterion.expected).font(.caption).foregroundStyle(.secondary)
                         let tasks = plan.tasks.filter { $0.criterionIDs.contains(criterion.id) }
@@ -282,6 +284,7 @@ struct SupervisionView: View {
                 ForEach(VerificationPage.allCases) { item in Text(item.title).tag(item) }
             }
             .pickerStyle(.segmented)
+            .handCursor()
             .accessibilityIdentifier("supervision.verificationLayers")
             .onChange(of: verificationPage) { _, _ in
                 if let focusedID, !belongsToVerificationPage(focusedID) { self.focusedID = nil }
@@ -289,13 +292,13 @@ struct SupervisionView: View {
             switch verificationPage {
             case .cases:
                 if plan.testCases.isEmpty { emptyCard("尚无测试用例", detail: "不能从工具日志的数量推断测试覆盖。") }
-                ForEach(plan.testCases.filter { focusedID == nil || $0.id == focusedID }) { test in testCaseCard(test) }
+                PagedItems(items: plan.testCases.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { test in testCaseCard(test) }
             case .executions:
                 if plan.executions.isEmpty { emptyCard("尚无执行证据", detail: "有测试代码或计划，不代表已经运行。") }
-                ForEach(plan.executions.filter { focusedID == nil || $0.id == focusedID }) { execution in executionCard(execution) }
+                PagedItems(items: plan.executions.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { execution in executionCard(execution) }
             case .acceptance:
                 if plan.criteria.isEmpty { emptyCard("尚无验收标准", detail: "需要可观察的预期结果及所需验证层级。") }
-                ForEach(plan.criteria.filter { focusedID == nil || $0.id == focusedID }) { criterion in criterionCard(criterion) }
+                PagedItems(items: plan.criteria.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { criterion in criterionCard(criterion) }
             }
         }
     }
@@ -357,11 +360,11 @@ struct SupervisionView: View {
                 countField("跳过", item.counts?.skipped)
             }
             Text("计数按来源记录展示；未知不视为 0，通过条数不等于需求验收。").font(.caption).foregroundStyle(.secondary)
-            DisclosureGroup("源码版本与原始证据") {
+            DeferredDisclosure("源码版本与原始证据") {
                 VStack(alignment: .leading, spacing: 12) {
                     field("验收约束摘要", item.contractDigest, monospaced: true)
                     if item.sourceFiles.isEmpty { Text("未绑定源码指纹，不能确认该执行适用于当前代码。").font(.caption).foregroundStyle(.orange) }
-                    ForEach(Array(item.sourceFiles.enumerated()), id: \.offset) { _, file in
+                    PagedItems(items: Array(item.sourceFiles.enumerated()), id: \.offset, pageSize: 20) { _, file in
                         field(file.path, "SHA256  \(known(file.sha256))", monospaced: true)
                     }
                     if let log = item.log { sourceReference(log) }
@@ -396,11 +399,11 @@ struct SupervisionView: View {
         VStack(alignment: .leading, spacing: 18) {
             pageIntro("修复声明与有效复验分开", detail: "历史失败持续保留。是否闭环取决于关联复验及其适用性；交付物也需对应来源、指纹和验证记录。")
             if plan.issues.isEmpty && focusedID == nil { emptyCard("尚未接入问题记录", detail: "未记录问题，不表示所有场景都已验证。") }
-            ForEach(plan.issues.filter { focusedID == nil || $0.id == focusedID }) { issue in issueCard(issue) }
+            PagedItems(items: plan.issues.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { issue in issueCard(issue) }
             if focusedID == nil || plan.artifacts.contains(where: { $0.id == focusedID }) {
                 Text("交付物").font(.title3.weight(.semibold)).padding(.top, 4)
                 if plan.artifacts.isEmpty { emptyCard("尚无交付物关联", detail: "源码版本与最终运行的 App 或压缩包仍需分别核对。") }
-                ForEach(plan.artifacts.filter { focusedID == nil || $0.id == focusedID }) { item in
+                PagedItems(items: plan.artifacts.filter { focusedID == nil || $0.id == focusedID }, id: \.id) { item in
                     SectionCard(title: "\(item.id) · \(item.title)", symbol: "shippingbox") {
                         assessmentSummary(assessment?.artifacts.first { $0.id == item.id })
                         field("本地产物位置", item.path, monospaced: true)
@@ -446,7 +449,7 @@ struct SupervisionView: View {
             SectionCard(title: "待核查与待补证据", symbol: "flag") {
                 if let assessment {
                     if assessment.interventions.isEmpty { Text("当前规则未列出待介入项；这不表示已覆盖全部业务场景。").foregroundStyle(.secondary) }
-                    ForEach(assessment.interventions) { item in interventionRow(item) }
+                    PagedItems(items: assessment.interventions, id: \.id) { item in interventionRow(item) }
                 } else { Text("正在读取证据，待介入事项尚未形成。").foregroundStyle(.secondary) }
             }
             SectionCard(title: "已保存的反馈草稿", symbol: "text.bubble") {
@@ -465,7 +468,7 @@ struct SupervisionView: View {
                             Image(systemName: "pencil").foregroundStyle(DevFlowStyle.accent)
                         }.padding(.vertical, 7).contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                     .accessibilityIdentifier("supervision.draft.\(targetID)")
                 }
             }
@@ -486,7 +489,7 @@ struct SupervisionView: View {
                 Text(item.title).font(.callout.weight(.medium))
                 Text(item.reason).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 Button("查看依据 · \(item.targetID)") { navigate(to: item.targetID) }
-                    .buttonStyle(.plain).foregroundStyle(DevFlowStyle.accent)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle())).foregroundStyle(DevFlowStyle.accent)
                     .accessibilityIdentifier("supervision.interventionEvidence.\(item.id)")
             }
             Spacer(minLength: 4)
@@ -537,7 +540,7 @@ struct SupervisionView: View {
                     Text("以下保留先前计划中的原话与拆解。导入次序不是需求变更发生时间；当前证据简报只评估现行计划。")
                         .font(.caption).foregroundStyle(.secondary)
                     ForEach(Array(history.enumerated().reversed()), id: \.offset) { index, snapshot in
-                        DisclosureGroup("第 \(index + 1) 份留存 · \(known(snapshot.version)) · \(snapshot.title)") {
+                        DeferredDisclosure("第 \(index + 1) 份留存 · \(known(snapshot.version)) · \(snapshot.title)") {
                             VStack(alignment: .leading, spacing: 12) {
                                 field("当时记录的原话", snapshot.originalRequest)
                                 labeledLines("假设", snapshot.assumptions, empty: "未记录")
@@ -564,6 +567,7 @@ struct SupervisionView: View {
                 Text(source.name).font(.callout.weight(.medium))
                 Spacer()
                 Toggle("读取此会话", isOn: Binding(get: { source.isEnabled }, set: { store.setSessionEnabled(id: source.id, enabled: $0) }))
+                    .handCursor()
                     .toggleStyle(.switch).controlSize(.small)
                     .disabled(store.isImporting)
                     .accessibilityIdentifier("supervision.sessionEnabled.\(source.id.uuidString)")
@@ -585,7 +589,7 @@ struct SupervisionView: View {
         if ids.isEmpty {
             Text("关联原文未知 / 尚未接入").font(.caption).foregroundStyle(.secondary)
         } else {
-            ForEach(Array(ids.enumerated()), id: \.offset) { _, id in
+            PagedItems(items: ids, id: \.self, pageSize: 20) { id in
                 if let record = project.records.first(where: { $0.id == id }) {
                     Button { onOpenRecord(id) } label: {
                         HStack(alignment: .top, spacing: 8) {
@@ -599,7 +603,7 @@ struct SupervisionView: View {
                             Image(systemName: "arrow.up.right").font(.caption)
                         }.contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain).foregroundStyle(DevFlowStyle.accent)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle())).foregroundStyle(DevFlowStyle.accent)
                     .accessibilityIdentifier("supervision.record.\(id)")
                 } else {
                     Text("\(id) · 关联记录尚未导入").font(.caption).foregroundStyle(.orange)
@@ -613,11 +617,11 @@ struct SupervisionView: View {
             Text(title).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             if ids.isEmpty { Text("尚无关联 / 未知").font(.caption).foregroundStyle(.secondary) }
             else {
-                ForEach(Array(ids.enumerated()), id: \.offset) { _, id in
+                PagedItems(items: ids, id: \.self, pageSize: 20) { id in
                     Button { navigate(to: id) } label: {
                         Label(targetTitle(id), systemImage: "arrow.up.right").font(.caption)
                     }
-                    .buttonStyle(.plain).foregroundStyle(DevFlowStyle.accent)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle())).foregroundStyle(DevFlowStyle.accent)
                     .accessibilityIdentifier("supervision.entity.\(id)")
                 }
             }
@@ -628,7 +632,7 @@ struct SupervisionView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("相关源码 / 资料路径").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             if paths.isEmpty { Text("未记录，适用范围待核查").font(.caption).foregroundStyle(.secondary) }
-            ForEach(Array(paths.enumerated()), id: \.offset) { _, path in
+            PagedItems(items: paths, id: \.self, pageSize: 20) { path in
                 Text(path).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
             }
         }
@@ -678,7 +682,7 @@ struct SupervisionView: View {
             .frame(maxWidth: .infinity, alignment: .leading).padding(17)
             .background(DevFlowStyle.card, in: RoundedRectangle(cornerRadius: 11))
             .overlay(RoundedRectangle(cornerRadius: 11).strokeBorder(Color.primary.opacity(0.07)))
-        }.buttonStyle(.plain)
+        }.buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
     }
 
     private func pageIntro(_ title: String, detail: String) -> some View {
@@ -718,7 +722,7 @@ struct SupervisionView: View {
         if lines.isEmpty {
             if !empty.isEmpty { Text(empty).font(.callout).foregroundStyle(.secondary) }
         } else {
-            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+            PagedItems(items: Array(lines.enumerated()), id: \.offset, pageSize: 20) { _, line in
                 HStack(alignment: .top, spacing: 8) {
                     Circle().fill(Color.secondary.opacity(0.5)).frame(width: 4, height: 4).padding(.top, 7)
                     Text(line).font(.callout).foregroundStyle(.secondary).lineSpacing(3).textSelection(.enabled)
@@ -833,7 +837,7 @@ private struct SupervisionFeedbackSheet: View {
                     store.copySupervisionFeedback(text, targetID: targetID)
                     notice = store.errorMessage == nil ? "已复制，请粘贴回原开发聊天。" : store.errorMessage
                 } label: { Label("复制反馈", systemImage: "doc.on.doc") }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(HandButtonStyle(base: BorderedProminentButtonStyle()))
                 .accessibilityIdentifier("supervision.copyFeedback")
                 Spacer()
             }
@@ -894,6 +898,7 @@ struct ProjectSourceManagementSheet: View {
                                         Text(source.name).font(.callout.weight(.medium))
                                         Spacer()
                                         Toggle("读取此会话", isOn: Binding(get: { source.isEnabled }, set: { store.setSessionEnabled(id: source.id, enabled: $0) }))
+                    .handCursor()
                                             .toggleStyle(.switch).controlSize(.small).disabled(store.isImporting)
                                             .accessibilityIdentifier("sourceManager.enabled.\(source.id.uuidString)")
                                     }

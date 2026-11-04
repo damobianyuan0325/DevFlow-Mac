@@ -84,6 +84,7 @@ struct ContentView: View {
     @State private var feedbackEdits: [String: String] = [:]
     @State private var sessionAttention: SessionAttention?
     @State private var showsSourceManagement = false
+    @State private var showsSupervisionPicker = false
 
     private func missingResultIDs(in project: Project) -> Set<String> {
         let answeredCalls = Set(project.records.filter { $0.action?.kind == .toolResult }.flatMap(\.relatedIDs))
@@ -154,6 +155,7 @@ struct ContentView: View {
         .frame(minWidth: 1060, minHeight: 680)
         .navigationTitle(store.selectedProject?.name ?? "DevFlow")
         .toolbar { workspaceToolbar }
+        .sheet(isPresented: $showsSupervisionPicker) { supervisionPicker }
         .sheet(isPresented: $showsSourceManagement) {
             ProjectSourceManagementSheet().environmentObject(store)
         }
@@ -236,7 +238,7 @@ struct ContentView: View {
                 Button { store.refreshSelected() } label: {
                     Label("刷新记录", systemImage: "arrow.clockwise")
                 }
-                .disabled(store.selectedProject == nil || store.selectedProject?.isSample == true || store.isImporting)
+                .disabled(store.selectedProject == nil || store.selectedProject?.isSample == true || store.isImporting || store.refreshingProjectID != nil)
                 .help(store.selectedProject?.isSample == true ? "内置复盘样本是固定的历史资料" : "重新读取项目资料，不运行项目命令")
                 .accessibilityIdentifier("refreshProject")
                 Button { store.exportProject() } label: {
@@ -273,6 +275,23 @@ struct ContentView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 22)
 
+            Button {
+                if store.selectedProject?.supervision != nil { section = .overview; sessionAttention = nil }
+                else { showsSupervisionPicker = true }
+            } label: {
+                Label("监督工作台", systemImage: "square.grid.2x2.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(DevFlowStyle.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
+            }
+            .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
+            .foregroundStyle(DevFlowStyle.accent)
+            .padding(.horizontal, 14).padding(.bottom, 10)
+            .keyboardShortcut("1", modifiers: .command)
+            .help("打开项目监督工作台（⌘1）")
+            .accessibilityIdentifier("openSupervisionWorkspace")
+
             List {
                 Section("项目") {
                     if store.state.projects.isEmpty {
@@ -286,6 +305,9 @@ struct ContentView: View {
                                 Image(systemName: project.isDevelopmentSession ? "text.bubble" : (project.isSample ? "book.closed" : "folder"))
                                     .foregroundStyle(store.selectedProjectID == project.id ? DevFlowStyle.accent : .secondary)
                                 Text(project.name).lineLimit(1)
+                                if project.supervision != nil {
+                                    Text("监督").font(.caption2).foregroundStyle(DevFlowStyle.accent)
+                                }
                                 Spacer(minLength: 0)
                                 if store.selectedProjectID == project.id {
                                     Circle().fill(DevFlowStyle.accent).frame(width: 6, height: 6)
@@ -294,7 +316,7 @@ struct ContentView: View {
                             .padding(.vertical, 4)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                         .accessibilityIdentifier("project.\(project.id.uuidString)")
                         .contextMenu {
                             Button("管理项目来源") { store.selectProject(project.id); showsSourceManagement = true }
@@ -319,7 +341,7 @@ struct ContentView: View {
                             .background(section == item ? DevFlowStyle.accent.opacity(0.1) : .clear, in: RoundedRectangle(cornerRadius: 7))
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                         .listRowInsets(EdgeInsets(top: 1, leading: 0, bottom: 1, trailing: 0))
                         .accessibilityIdentifier("section.\(item.rawValue)")
                     }
@@ -335,7 +357,7 @@ struct ContentView: View {
                     Label("打开复盘样本", systemImage: "book")
                         .font(.caption)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                 .foregroundStyle(DevFlowStyle.accent)
                 .disabled(store.isImporting)
                 .accessibilityIdentifier("loadSampleSidebar")
@@ -343,6 +365,37 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
         }
+    }
+
+    private var supervisionPicker: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("监督工作台").font(.title2.bold())
+            Text("当前项目还没有监督计划。选择已接入的监督项目，或导入智能体生成的 devflow-supervision.json。普通历史与会话记录仍可继续查看。")
+                .foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(store.state.projects.filter { $0.supervision != nil }) { project in
+                        Button {
+                            store.selectProject(project.id)
+                            section = .overview; sessionAttention = nil
+                            showsSupervisionPicker = false
+                        } label: {
+                            Label(project.name, systemImage: "square.grid.2x2")
+                                .frame(maxWidth: .infinity, alignment: .leading).padding(8)
+                        }
+                        .accessibilityIdentifier("openSupervisionProject.\(project.id.uuidString)")
+                    }
+                }
+            }
+            .frame(maxHeight: 220)
+            HStack {
+                Button("关闭") { showsSupervisionPicker = false }.keyboardShortcut(.cancelAction)
+                Spacer()
+                Button("导入监督资料…") { showsSupervisionPicker = false; store.importProject() }
+                    .disabled(store.isImporting)
+            }
+        }
+        .padding(24).frame(width: 500)
     }
 
     private func sectionCount(_ item: WorkspaceSection) -> Int? {
@@ -402,7 +455,7 @@ struct ContentView: View {
                         SmallBadge(text: "筛选：\(focus.title)", color: focus.color)
                         Spacer()
                         Button("查看全部动作") { sessionAttention = nil }
-                            .font(.caption).buttonStyle(.plain).foregroundStyle(DevFlowStyle.accent)
+                            .font(.caption).buttonStyle(HandButtonStyle(base: PlainButtonStyle())).foregroundStyle(DevFlowStyle.accent)
                             .accessibilityIdentifier("clearSessionAttentionFilter")
                     }
                 }
@@ -414,7 +467,7 @@ struct ContentView: View {
                     .accessibilityIdentifier("recordSearch")
                 if !searchText.isEmpty {
                     Button { searchText = "" } label: { Image(systemName: "xmark.circle.fill") }
-                        .buttonStyle(.plain).foregroundStyle(.tertiary)
+                        .buttonStyle(HandButtonStyle(base: PlainButtonStyle())).foregroundStyle(.tertiary)
                         .accessibilityLabel("清除搜索")
                 }
             }
@@ -422,6 +475,7 @@ struct ContentView: View {
             .background(DevFlowStyle.card, in: RoundedRectangle(cornerRadius: 8))
             HStack {
                 Toggle("历史截止日期", isOn: $usesCutoff)
+                    .handCursor()
                     .toggleStyle(.checkbox)
                     .font(.caption)
                     .accessibilityIdentifier("historyCutoffToggle")
@@ -548,7 +602,7 @@ struct ContentView: View {
                     }
                     .padding(.vertical, 7).contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                 .accessibilityIdentifier("sessionAttention.\(focus.rawValue)")
             }
             Text("按当前筛选统计。缺少结果只表示尚未找到关联的工具结果，不代表失败或 Agent 卡住。")
@@ -561,7 +615,7 @@ struct ContentView: View {
                         RecordRow(record: failure, showsEventTime: true)
                             .frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                     .accessibilityIdentifier("sessionFailure.\(failure.id)")
                 }
             }
@@ -585,7 +639,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                     .accessibilityIdentifier("overview.record.\(record.id)")
                     if record.id != records.last?.id { Divider() }
                 }
@@ -607,19 +661,19 @@ struct ContentView: View {
                 Button { store.connectDevelopmentSession() } label: {
                     Label("接入开发会话", systemImage: "text.bubble").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent).controlSize(.large)
+                .buttonStyle(HandButtonStyle(base: BorderedProminentButtonStyle())).controlSize(.large)
                 .disabled(store.isImporting)
                 .accessibilityIdentifier("connectSessionWelcome")
                 Button { store.importProject() } label: {
                     Label("导入项目资料", systemImage: "folder.badge.plus").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered).controlSize(.large)
+                .buttonStyle(HandButtonStyle(base: BorderedButtonStyle())).controlSize(.large)
                 .disabled(store.isImporting)
                 .accessibilityIdentifier("importProjectWelcome")
                 Button { store.loadSample() } label: {
                     Label("先看看教学复盘样本", systemImage: "book.closed").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered).controlSize(.large)
+                .buttonStyle(HandButtonStyle(base: BorderedButtonStyle())).controlSize(.large)
                 .disabled(store.isImporting)
                 .accessibilityIdentifier("loadSampleWelcome")
             }
@@ -862,7 +916,7 @@ private struct RecordDetailView: View {
                         }
                         .padding(.vertical, 5).contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(HandButtonStyle(base: PlainButtonStyle()))
                     .accessibilityIdentifier("related.\(id)")
                 } else {
                     Label("\(id) · 关联记录尚未导入", systemImage: "link.badge.plus")
@@ -915,7 +969,7 @@ private struct RecordDetailView: View {
                 } label: {
                     Label("复制反馈", systemImage: "doc.on.doc")
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(HandButtonStyle(base: BorderedProminentButtonStyle()))
                 .accessibilityIdentifier("copyFeedback")
                 Spacer(minLength: 0)
             }

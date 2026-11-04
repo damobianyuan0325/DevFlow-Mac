@@ -95,6 +95,10 @@ public enum ProjectImporter {
     }
 
     private static func loadJSON(_ url: URL, sourceRootOverride: String?) throws -> ImportResult {
+        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize
+        if let size, size > maximumJSONBytes {
+            throw DevFlowError.invalid("JSON 为 \(size) 字节，超过 8 MiB（\(maximumJSONBytes) 字节）导入上限。未覆盖已有资料。可由资料生产者无损紧凑序列化并原子写入；若仍超限，保留完整账本，另行提供注明范围且图引用完整的资料包，不要删除失败历史。")
+        }
         let bytes = try read(url, limit: maximumJSONBytes)
         let package: ImportPackage
         do {
@@ -150,6 +154,9 @@ public enum ProjectImporter {
             }
         }
         var warnings: [String] = []
+        if bytes.count >= maximumJSONBytes * 9 / 10 {
+            warnings.append("JSON 已使用 \(bytes.count)/\(maximumJSONBytes) 字节，接近 8 MiB 上限；请规划无损紧凑写入与保留完整历史的分包，不要删除失败记录。")
+        }
         var records = package.records
         var fileResults: [String: Result<String, Error>] = [:]
         var verifiedBytes = 0

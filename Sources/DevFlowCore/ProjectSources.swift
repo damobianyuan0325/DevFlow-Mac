@@ -3,6 +3,10 @@ import Foundation
 public struct ProjectRefresh {
     public var project: Project
     public var primaryError: String?
+
+    public init(project: Project, primaryError: String? = nil) {
+        self.project = project; self.primaryError = primaryError
+    }
 }
 
 /// User-selected sources only. This loader never enumerates a session directory or runs imported commands.

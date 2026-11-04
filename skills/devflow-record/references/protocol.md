@@ -70,6 +70,10 @@ artifact.path 指向单个文件，例如 ZIP；`.app` 目录不能冒充一个�
 
 问题显示 open / closed / unverified，与 declaredClosed 不同。当前关闭评估核对 development 修复记录的 ID、status（recorded/passed）与时间，以及**严格晚于修复**的最新有效复验，覆盖绑定 A/T。只填 declaredClosed=true、旧成功或相等时间都不够。当前关闭评估不读取修复记录原件或校验其 digest，因此 closed 不能证明修复内容已被独立核验；代理仍应保存真实修复来源，供用户回查。再次发现相似问题时，记录 rootCause 与 missedCheckCause；未查明就保留未知。
 
+问题有效复验另有**精确层级守卫**：对 issue.criterionIDs 与该 E 所属 T.criterionIDs 的交集，每个 A.requiredLevel 都须严格等于 E.level；任一相交标准不等，该 E 整体不计入该问题的有效复验。不是层级大小或“更高即可”，`inspect` 中的 executions.validPass、同 T 的当前评估 satisfied 或 T.level == E.level 都不足以单独证明问题可关闭；只有通过完整守卫的 E 才参与问题全部 A/T 的覆盖。
+
+混合组件、集成、原生和运行层级的要求应在执行前分清 A 子标准、T 以及问题的实际范围，不把组件 T 的通过当作 runtime A 的问题复验。不得为求 closed 改写旧 E 层级、降低 requiredLevel 或删掉必需回归覆盖。先对照官方完整过滤条件，再以同一次 `inspect` 的 issues.state 及具体原因作结论；“缺少晚于修复的有效复验”是合并提示，不能仅据文字断定时间错误。
+
 `inspect` 的退出码 0 仅表示成功读取并输出 JSON。必须读 `validationErrors`、`warnings`、`criteria/requirements.state`、`executions.validPass`、`issues.state` 的具体原因；不可用退出码单独验收。
 
 ## 读取上限与实际可见范围

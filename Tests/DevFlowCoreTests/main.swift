@@ -1,6 +1,29 @@
 import Foundation
+import DevFlowCore
 
 let cases: [(String, () throws -> Void)] = [
+    ("PaginationAndSaveQueue", {
+        var seen: [Int] = []
+        for page in 0..<129 {
+            let window = PageWindow(count: 1281, requestedPage: page)
+            checkTrue(window.range.count <= 10)
+            seen += Array(window.range)
+        }
+        checkEqual(seen, Array(0..<1281))
+        checkEqual(PageWindow(count: 3, requestedPage: 128).range, 0..<3)
+        checkEqual(PageWindow(count: 0, requestedPage: -1).range, 0..<0)
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("paging-save-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let storage = WorkspaceStorage(url: root.appendingPathComponent("workspace.json"))
+        let writer = WorkspaceSaveQueue(storage: storage)
+        var state = WorkspaceState()
+        let first = UUID(), last = UUID()
+        state.selectedProjectID = first; writer.save(state) { _ in }
+        state.selectedProjectID = last; writer.save(state) { _ in }
+        writer.flush()
+        checkEqual(try storage.load().selectedProjectID, last)
+    }),
+    ("ImporterTests.testJSONCapacityBoundaryHasActionableWarning", { let suite = ImporterTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testJSONCapacityBoundaryHasActionableWarning() }),
     ("ImporterTests.testBundledTeachingSampleHasResolvableSyntheticHistory", { try ImporterTests().testBundledTeachingSampleHasResolvableSyntheticHistory() }),
     ("ProjectSourcesTests.testTwoExplicitSourcesDeduplicateAndPersist", { let suite = ProjectSourcesTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testTwoExplicitSourcesDeduplicateAndPersist() }),
     ("ProjectSourcesTests.testDisabledSourceKeepsHistoryAndResumeReadsNewData", { let suite = ProjectSourcesTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testDisabledSourceKeepsHistoryAndResumeReadsNewData() }),
@@ -8,6 +31,8 @@ let cases: [(String, () throws -> Void)] = [
     ("ProjectSourcesTests.testPlanRevisionsArePreservedWithoutDuplicateSnapshots", { let suite = ProjectSourcesTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testPlanRevisionsArePreservedWithoutDuplicateSnapshots() }),
     ("ProjectSourcesTests.testSchemaTwoRoundTripAndLegacyWorkspaceRemainReadable", { let suite = ProjectSourcesTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testSchemaTwoRoundTripAndLegacyWorkspaceRemainReadable() }),
     ("ProjectSourcesTests.testFeedbackCarriesRequirementAndDoesNotClaimDelivery", { let suite = ProjectSourcesTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testFeedbackCarriesRequirementAndDoesNotClaimDelivery() }),
+    ("SupervisionTests.testIssueExplainsExactRequiredLayerMismatch", { let suite = SupervisionTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testIssueExplainsExactRequiredLayerMismatch() }),
+    ("SupervisionTests.testLatestEvidenceGetsBudgetBeforeHistoricalSnapshots", { let suite = SupervisionTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testLatestEvidenceGetsBudgetBeforeHistoricalSnapshots() }),
     ("SupervisionTests.testCompleteEvidenceChainIsSatisfied", { let suite = SupervisionTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testCompleteEvidenceChainIsSatisfied() }),
     ("SupervisionTests.testLowerLayerCannotSatisfyNativeCriterion", { let suite = SupervisionTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testLowerLayerCannotSatisfyNativeCriterion() }),
     ("SupervisionTests.testChangedSourceMakesOldPassStale", { let suite = SupervisionTests(); try suite.setUpWithError(); defer { try? suite.tearDownWithError() }; try suite.testChangedSourceMakesOldPassStale() }),

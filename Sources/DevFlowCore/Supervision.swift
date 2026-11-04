@@ -272,7 +272,16 @@ public enum SupervisionEvaluator {
         func missingRecords(_ ids: [String]) -> [String] {
             ids.filter { recordGroups[$0]?.count != 1 }.map { "关联动作 \($0) 未接入或 ID 不唯一，尚无可核对记录。" }
         }
-        for execution in plan.executions {
+        // Give each test's current candidates the finite I/O budget first.
+        // Unknown dates and ties remain candidates; never select just a success.
+        let groups = Dictionary(grouping: plan.executions, by: \.testCaseID)
+        let currentIDs = Set(groups.values.flatMap { entries -> [String] in
+            if entries.contains(where: { executionDate($0) == nil }) { return entries.map(\.id) }
+            let newest = entries.compactMap(executionDate).max()
+            return entries.filter { executionDate($0) == newest }.map(\.id)
+        })
+        let readOrder = plan.executions.filter { currentIDs.contains($0.id) } + plan.executions.filter { !currentIDs.contains($0.id) }
+        for execution in readOrder {
             let test = tests[execution.testCaseID]!
             var reasons = missingRecords(execution.recordIDs)
             var stale = false
@@ -317,6 +326,8 @@ public enum SupervisionEvaluator {
             if valid { reasons = ["结构化通过、完整计数、日志与源码身份在本次读取时一致；只支持该用例的 \(test.level.title) 层级。", "摘要一致不证明业务预期充分、日志真实或具有防恶意能力；命令仅记录，未由本软件执行。"] }
             assessment.executions.append(.init(id: execution.id, state: state, reasons: reasons, isValidPass: valid))
         }
+        let originalOrder = Dictionary(uniqueKeysWithValues: plan.executions.enumerated().map { ($0.element.id, $0.offset) })
+        assessment.executions.sort { originalOrder[$0.id]! < originalOrder[$1.id]! }
         let executionAssessments = Dictionary(uniqueKeysWithValues: assessment.executions.map { ($0.id, $0) })
         func latest(_ testID: String) -> [VerificationExecution] {
             let entries = plan.executions.filter { $0.testCaseID == testID }
@@ -348,18 +359,28 @@ public enum SupervisionEvaluator {
             if fixDates.count != fixes.count || fixDates.isEmpty { reasons.append("修复真实时间未记录，不能确认复验发生在修复之后。") }
             let latestFix = fixDates.max()
             var validRetests: [VerificationExecution] = []
+            var rejectedRetests: [String] = []
             for id in issue.verificationExecutionIDs {
-                guard let execution = plan.executions.first(where: { $0.id == id }), let test = tests[execution.testCaseID],
-                      executionAssessments[id]?.isValidPass == true, testAssessment(test).state == .satisfied,
-                      latest(execution.testCaseID).count == 1, latest(execution.testCaseID).first?.id == id,
-                      let checkedAt = executionDate(execution), let latestFix, checkedAt > latestFix,
-                      issue.criterionIDs.allSatisfy({ criterionID in !test.criterionIDs.contains(criterionID) || plan.criteria.first(where: { $0.id == criterionID })?.requiredLevel == execution.level }) else { continue }
-                validRetests.append(execution)
+                guard let execution = plan.executions.first(where: { $0.id == id }), let test = tests[execution.testCaseID] else { continue }
+                var rejected: [String] = []
+                if executionAssessments[id]?.isValidPass != true { rejected.append("执行证据当前不满足有效通过，见该执行的核验原因") }
+                if testAssessment(test).state != .satisfied || latest(test.id).count != 1 || latest(test.id).first?.id != id {
+                    rejected.append("不是用例唯一、最新且有效的执行（含时间未知或并列）")
+                }
+                if let checkedAt = executionDate(execution), let latestFix {
+                    if checkedAt <= latestFix { rejected.append("复验时间没有严格晚于最后修复时间") }
+                } else { rejected.append("修复或复验时间缺失，无法核对先后") }
+                for criterion in plan.criteria where issue.criterionIDs.contains(criterion.id) && test.criterionIDs.contains(criterion.id) && criterion.requiredLevel != execution.level {
+                    rejected.append("标准 \(criterion.id) 要求 \(criterion.requiredLevel.title) 层级，执行为 \(execution.level.title)；层级必须精确匹配")
+                }
+                if rejected.isEmpty { validRetests.append(execution) }
+                else { rejectedRetests.append("复验 \(id)（用例 \(test.id)）未纳入闭环：" + rejected.joined(separator: "；")) }
             }
             let coveredCases = Set(validRetests.map(\.testCaseID))
             let coveredCriteria = Set(validRetests.flatMap { tests[$0.testCaseID]?.criterionIDs ?? [] })
             if issue.verificationExecutionIDs.isEmpty || validRetests.isEmpty { reasons.append("缺少晚于修复且当前仍有效的对应复验。") }
             if issue.criterionIDs.isEmpty || !Set(issue.criterionIDs).isSubset(of: coveredCriteria) || !Set(issue.testCaseIDs).isSubset(of: coveredCases) { reasons.append("有效复验尚未覆盖问题涉及的全部标准和回归用例。") }
+            if !reasons.isEmpty { reasons += rejectedRetests }
             let closed = reasons.isEmpty
             if closed { reasons = ["修复记录存在，且对应标准与回归用例的最新有效复验发生在修复之后。", "闭环只覆盖已声明问题范围；关闭声明本身不参与通过判定。"] }
             assessment.issues.append(.init(id: issue.id, state: closed ? .closed : (issue.declaredClosed ? .unverified : .open), reasons: reasons, effectiveRetestIDs: validRetests.map(\.id)))
@@ -430,6 +451,9 @@ public enum SupervisionEvaluator {
             "问题：\(assessment.issues.filter { $0.state == .closed }.count)/\(plan.issues.count) 项有修复与有效复验；产物 \(assessment.artifacts.filter { $0.state == .satisfied }.count)/\(plan.artifacts.count) 项字节与关联凭据可核对。",
             "仅只读核对所声明的文件和关系；未执行命令。SHA256 一致不能证明业务正确、原始声明真实或防止恶意篡改。"
         ]
+        if reader.budgetExceeded {
+            assessment.briefing.append("证据读取达到预算：优先核验各用例最新候选（含并列和时间未知），其余历史仍保留；未读取的文件明确标为不可核验，不表示历史全部核验或当前验收全部通过。")
+        }
         return assessment
     }
 
@@ -466,13 +490,14 @@ public enum SupervisionEvaluator {
         let root: String
         var cache: [String: Result<String, DevFlowError>] = [:]
         var bytesRead = 0
+        var budgetExceeded = false
         init(root: String) { self.root = root }
         func digest(path: String) -> Result<String, DevFlowError> {
             if let cached = cache[path] { return cached }
             let result: Result<String, DevFlowError>
             do {
                 try validatePath(path)
-                guard cache.count < 1_024 else { throw DevFlowError.invalid("本次最多核验 1024 个文件，后续未读取。") }
+                guard cache.count < 1_024 else { budgetExceeded = true; throw DevFlowError.invalid("本次最多核验 1024 个文件，后续未读取。") }
                 let base = URL(fileURLWithPath: root).standardizedFileURL
                 guard root.hasPrefix("/"), base.path == base.resolvingSymlinksInPath().path else { throw DevFlowError.invalid("来源根目录不是绝对真实路径或含符号链接。") }
                 var current = base
@@ -485,11 +510,11 @@ public enum SupervisionEvaluator {
                 let info = try current.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
                 guard info.isRegularFile == true else { throw DevFlowError.invalid("来源必须是普通文件。") }
                 let limit = 4 * 1_024 * 1_024
-                guard (info.fileSize ?? limit + 1) <= limit, bytesRead + (info.fileSize ?? limit + 1) <= 32 * 1_024 * 1_024 else { throw DevFlowError.invalid("核验读取超过单文件 4 MiB 或累计 32 MiB 上限，未读取。") }
+                guard (info.fileSize ?? limit + 1) <= limit, bytesRead + (info.fileSize ?? limit + 1) <= 32 * 1_024 * 1_024 else { budgetExceeded = true; throw DevFlowError.invalid("核验读取超过单文件 4 MiB 或累计 32 MiB 上限，未读取。") }
                 let handle = try FileHandle(forReadingFrom: current); defer { try? handle.close() }
                 var data = Data()
                 while data.count <= limit, let chunk = try handle.read(upToCount: min(65_536, limit + 1 - data.count)), !chunk.isEmpty { data.append(chunk) }
-                guard data.count <= limit, bytesRead + data.count <= 32 * 1_024 * 1_024 else { throw DevFlowError.invalid("核验读取超过字节上限，未使用截断摘要。") }
+                guard data.count <= limit, bytesRead + data.count <= 32 * 1_024 * 1_024 else { budgetExceeded = true; throw DevFlowError.invalid("核验读取超过字节上限，未使用截断摘要。") }
                 bytesRead += data.count
                 result = .success(ProjectImporter.digest(data))
             } catch let error as DevFlowError { result = .failure(error) }

@@ -55,3 +55,17 @@ public enum ProjectHistory {
         return copy
     }
 }
+
+/// Serial disk work keeps JSON encoding, validation and backup I/O off the UI thread.
+public final class WorkspaceSaveQueue: @unchecked Sendable {
+    private let queue = DispatchQueue(label: "devflow.workspace-save", qos: .utility)
+    private let storage: WorkspaceStorage
+    public init(storage: WorkspaceStorage) { self.storage = storage }
+    public func save(_ state: WorkspaceState, completion: @escaping @Sendable (String?) -> Void) {
+        queue.async { [storage] in
+            do { try storage.save(state); completion(nil) }
+            catch { completion(error.localizedDescription) }
+        }
+    }
+    public func flush() { queue.sync {} }
+}

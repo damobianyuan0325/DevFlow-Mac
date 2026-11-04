@@ -22,6 +22,24 @@ final class ImporterTests: CheckCase {
         checkEqual(Set(try FileManager.default.contentsOfDirectory(atPath: resources.path)), Set(["DevFlowLogo.png", "placeholder.txt", "example-history.json", "example-notes.md"]))
     }
 
+    func testJSONCapacityBoundaryHasActionableWarning() throws {
+        let limit = 8 * 1024 * 1024
+        let base = "{\"schemaVersion\":1,\"name\":\"Capacity fixture\",\"records\":[]}"
+        let url = try write("capacity.json", base + String(repeating: " ", count: limit - base.utf8.count))
+        let imported = try ProjectImporter.load(url: url)
+        checkTrue(imported.warnings.contains { $0.contains("接近 8 MiB") })
+        let original = try Data(contentsOf: url) + Data([32])
+        try original.write(to: url)
+        do {
+            _ = try ProjectImporter.load(url: url)
+            checkTrue(false, "Oversize JSON must fail")
+        } catch {
+            checkTrue(error.localizedDescription.contains("8388609"))
+            checkTrue(error.localizedDescription.contains("不要删除失败历史"))
+        }
+        checkEqual(try Data(contentsOf: url), original, "Read-only import must preserve the entire input")
+    }
+
     private var root: URL!
 
     override func setUpWithError() throws {

@@ -9,7 +9,7 @@
 | 导入与来源 | 有效 JSON/Markdown 可读；坏输入、不安全路径及超预算明确拒绝或提示；不改原项目 | `ImporterTests`、`SupervisionTests`，加真实原生导入 |
 | 项目与历史 | 搜索、类型、日期、关联、来源查看可用；未知日期和旧失败保留 | `WorkspaceTests`，加原生筛选与来源查看 |
 | 反馈与持久化 | 草稿可编辑、保存、复制、关闭重开读回；坏工作区不被空数据覆盖 | `WorkspaceTests`、监督反馈检查，加原生重启 |
-| 持续读取 | 新资料刷新可见；失败保留最后内容；暂停和单会话停用只影响资料读取 | `ProjectSourcesTests`，加受控增量和原生读取 |
+| 持续读取 | 新资料刷新可见；失败保留最后内容；暂停和单会话停用只影响资料读取 | `ProjectSourcesTests`、`bash scripts/test-app-state.sh`，加连续定时周期的原生阅读和编辑检查 |
 | 公开会话动作 | 手选 JSONL，调用与返回独立，按来源关联与去重；排除内部推理和配置，披露缺口 | `SessionImporterTests`，加手选会话导入 |
 | 监督关系 | R/A/U/T/E、问题和产物引用有效；原话、拆解和先前计划快照可查 | `SupervisionTests`、协议及 CLI 读回 |
 | 当前适用性 | 合同、源码、日志、版本、计数与层级匹配；缺证、过期、失败各自显示 | `SupervisionTests`，含合同变化及无效通过反例 |

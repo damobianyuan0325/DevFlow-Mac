@@ -112,6 +112,40 @@ final class SupervisionTests: CheckCase {
         input.executions.append(failure)
         checkFalse(assess(input, records: [fix]).issues.first?.state == .closed, "指定旧复验不能遮住新失败")
     }
+    func testLatestEvidenceGetsBudgetBeforeHistoricalSnapshots() throws {
+        var input = try plan()
+        let current = input.executions[0]
+        var history: [VerificationExecution] = []
+        for index in 0..<1025 {
+            var old = current; old.id = "old-\(index)"; old.occurredAt = "2026-10-29T03:00:00Z"
+            let path = "history/\(index).log"
+            old.log = SourceReference(path: path, digest: try file(path, "old log"))
+            history.append(old)
+        }
+        input.executions = history + [current]
+        let result = assess(input)
+        checkTrue(result.executions.last?.isValidPass == true, "Current evidence must get budget before old snapshots")
+        checkEqual(result.executions.map(\.id), input.executions.map(\.id), "Retain full history in original order")
+        checkTrue(result.executions.contains { $0.state == .unverified }, "Budget-exhausted history remains unknown")
+        checkTrue(result.briefing.joined().contains("预算"))
+        var failure = current; failure.id = "current-failure"; failure.result = .failed
+        input.executions.append(failure)
+        checkEqual(assess(input).criteria.first?.state, .failed, "Tied current failure cannot disappear")
+    }
+
+    func testIssueExplainsExactRequiredLayerMismatch() throws {
+        var input = try plan()
+        input.criteria[0].requiredLevel = .native
+        input.executions[0].contractDigest = try SupervisionEvaluator.contractDigest(plan: input, testCaseID: "T1")
+        input.issues = [SupervisionIssue(id: "B1", title: "Layer mismatch", criterionIDs: ["A1"], testCaseIDs: ["T1"], declaredClosed: true, fixRecordIDs: ["fix1"], verificationExecutionIDs: ["E1"])]
+        let fix = ActivityRecord(id: "fix1", kind: .development, title: "Fix", summary: "Fix", occurredAt: "2026-10-30T02:59:00Z", origin: .execution, source: SourceReference(path: "Sources/Feature.swift"))
+        let result = assess(input, records: [fix])
+        checkTrue(result.executions.first?.isValidPass == true)
+        checkEqual(result.issues.first?.state, .unverified)
+        let reasons = result.issues.first?.reasons.joined() ?? ""
+        checkTrue(reasons.contains("E1") && reasons.contains("A1") && reasons.contains("层级"), "Explain the actual layer mismatch")
+    }
+
     func testInvalidGraphAndDuplicateIDsRejected() throws {
         var input = try plan(); input.criteria[0].requirementID = "missing"
         checkThrows(try input.validate())

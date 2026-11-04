@@ -8,6 +8,7 @@ struct DevFlowApp: App {
     var body: some Scene {
         WindowGroup("DevFlow") {
             ContentView().environmentObject(store)
+                .buttonStyle(HandButtonStyle(base: DefaultButtonStyle()))
                 .frame(minWidth: 1020, minHeight: 660)
                 .alert("需要留意", isPresented: Binding(get: { store.errorMessage != nil }, set: { if !$0 { store.errorMessage = nil } })) {
                     Button("知道了") { store.errorMessage = nil }
