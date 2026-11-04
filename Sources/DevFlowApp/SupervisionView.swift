@@ -331,8 +331,6 @@ struct SupervisionView: View {
         let result = assessment?.executions.first { $0.id == item.id }
         return SectionCard(title: "\(item.id) · 执行证据", symbol: "terminal") {
             HStack {
-                stateBadge(result?.state)
-                SmallBadge(text: "记录结果：\(verificationResult(item.result))", color: .secondary)
                 SmallBadge(text: item.level.title, color: .secondary)
                 Spacer()
                 Button("单独核验") {
@@ -342,6 +340,7 @@ struct SupervisionView: View {
                 .accessibilityIdentifier("supervision.inspectExecution.\(item.id)")
                 feedbackButton(item.id)
             }
+            ExecutionStatusSummary(execution: item, state: result?.state)
             textLines(result?.reasons ?? [], empty: "尚未完成证据适用性核查")
             entityLinks("测试用例 T", ids: [item.testCaseID])
             HStack(alignment: .top, spacing: 24) {
@@ -750,16 +749,6 @@ struct SupervisionView: View {
         case .inProgress: return "记录为进行中"
         case .completed: return "记录为已完成"
         case .blocked: return "记录为受阻"
-        }
-    }
-
-    private func verificationResult(_ result: VerificationResult) -> String {
-        switch result {
-        case .passed: return "通过"
-        case .failed: return "失败"
-        case .unknown: return "未知"
-        case .notRun: return "未运行"
-        case .blocked: return "受阻"
         }
     }
 

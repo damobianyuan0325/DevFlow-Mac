@@ -233,6 +233,66 @@ final class SupervisionTests: CheckCase {
         checkFalse(assess(input).executions.first?.isValidPass == true)
         checkTrue(assess(input).executions.first?.reasons.joined().contains("4 MiB") == true)
     }
+    func testUnknownNonzeroExitIsNotPresentedAsProductFailure() throws {
+        var input = try plan()
+        input.executions[0].result = .unknown
+        input.executions[0].exitCode = 3
+        input.executions[0].counts = ExecutionCounts()
+        let result = assess(input)
+        checkEqual(result.executions.first?.state, .failed, "Keep the existing nonzero-exit gate")
+        checkFalse(result.executions.first?.isValidPass == true)
+        checkEqual(result.executions.first?.state.title, "核验未通过", "A rejected verification is not a proven product failure")
+        checkEqual(input.executions[0].result, .unknown)
+        checkNil(input.executions[0].counts?.failed)
+        let display = ExecutionPresentation(execution: input.executions[0], state: result.executions.first?.state)
+        checkEqual(display.title, "核验未通过 · 非零退出")
+        checkEqual(display.tone, .caution)
+        checkEqual(display.recordedResult, "记录结果：未知")
+        checkEqual(display.exitStatus, "命令退出码：3（非零）")
+        checkTrue(display.explanation?.contains("不能判定产品运行失败") == true)
+
+        for code in [1, 3, 7, -1] {
+            for recorded in [VerificationResult.unknown, .blocked, .notRun, .passed, .failed] {
+                var candidate = try plan()
+                candidate.executions[0].result = recorded
+                candidate.executions[0].exitCode = code
+                if recorded != .passed { candidate.executions[0].counts = ExecutionCounts() }
+                let checked = assess(candidate).executions[0]
+                checkEqual(checked.state, .failed, "Nonzero exit never becomes a pass, including code 3")
+                checkFalse(checked.isValidPass)
+                let presentation = ExecutionPresentation(execution: candidate.executions[0], state: checked.state)
+                checkEqual(presentation.tone, recorded == .failed ? .failure : .caution)
+                if recorded == .passed { checkTrue(presentation.explanation?.contains("冲突") == true) }
+            }
+        }
+        for code: Int? in [nil, 0] {
+            input.executions[0].exitCode = code
+            let checked = assess(input).executions[0]
+            checkEqual(checked.state, .unverified)
+            checkFalse(checked.isValidPass)
+            checkEqual(ExecutionPresentation(execution: input.executions[0], state: checked.state).title, "缺少验证")
+        }
+        input.executions[0].counts = ExecutionCounts(total: 1, passed: 0, failed: 1, skipped: 0)
+        let countedFailure = assess(input).executions[0]
+        checkEqual(countedFailure.state, .failed)
+        checkEqual(ExecutionPresentation(execution: input.executions[0], state: countedFailure.state).tone, .failure)
+
+        // A newer unknown/nonzero execution still blocks acceptance and issue closure.
+        var history = try plan()
+        var newer = history.executions[0]
+        newer.id = "E-unknown"; newer.result = .unknown; newer.exitCode = 3
+        newer.counts = ExecutionCounts(); newer.occurredAt = "2026-10-30T04:00:00Z"
+        history.executions.append(newer)
+        history.issues = [SupervisionIssue(id: "B-unknown", title: "Still unverified", criterionIDs: ["A1"], testCaseIDs: ["T1"], declaredClosed: true, fixRecordIDs: ["fix-unknown"], verificationExecutionIDs: ["E1", "E-unknown"])]
+        let fix = ActivityRecord(id: "fix-unknown", kind: .development, title: "Recorded fix", summary: "Synthetic fixture", occurredAt: "2026-10-30T02:00:00Z", source: SourceReference(path: "Sources/Feature.swift"))
+        let evaluated = assess(history, records: [fix])
+        checkEqual(evaluated.criteria.first?.state, .failed)
+        checkFalse(evaluated.issues.first?.state == .closed)
+        let single = try SupervisionEvaluator.inspectExecution(plan: history, root: root.path, records: [fix], executionID: newer.id)
+        checkEqual(single, evaluated.executions.last)
+        checkEqual(history.executions.last?.result, .unknown)
+    }
+
     func testUnknownCountsAreNotZero() throws {
         var input = try plan(); input.executions[0].counts = ExecutionCounts(total: 1, passed: 1)
         checkEqual(assess(input).criteria.first?.state, .unverified)

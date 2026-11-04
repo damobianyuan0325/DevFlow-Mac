@@ -66,7 +66,7 @@ artifact.path 指向单个文件，例如 ZIP；`.app` 目录不能冒充一个�
 
 `inspect` 计算 satisfied / partial / failed / unverified / stale / blocked；不要把这个状态写成 E.result。
 
-有效通过同时看合同、候选版本、源文件、日志、计数、层级和已知结果。非零 exitCode 表示失败；缺少退出码不能补 0。T.level 与 E.level 对应，A 必须有 requiredLevel 对应的证据。新的失败优先于旧成功；缺失或并列时间不能凭数组顺序挑一个成功。
+有效通过同时看合同、候选版本、源文件、日志、计数、层级和已知结果。非零 exitCode 表示核验未通过（机读 state=failed），不改写 E.result，也不能单凭此断定产品运行失败；缺少退出码不能补 0。T.level 与 E.level 对应，A 必须有 requiredLevel 对应的证据。新的失败优先于旧成功；缺失或并列时间不能凭数组顺序挑一个成功。
 
 问题显示 open / closed / unverified，与 declaredClosed 不同。当前关闭评估核对 development 修复记录的 ID、status（recorded/passed）与时间，以及**严格晚于修复**的最新有效复验，覆盖绑定 A/T。只填 declaredClosed=true、旧成功或相等时间都不够。当前关闭评估不读取修复记录原件或校验其 digest，因此 closed 不能证明修复内容已被独立核验；代理仍应保存真实修复来源，供用户回查。再次发现相似问题时，记录 rootCause 与 missedCheckCause；未查明就保留未知。
 
@@ -95,3 +95,7 @@ DevFlow 0.2.0-preview.5 起 JSON 与编码后的监督计划各 ≤64 MiB（更�
 ```
 
 输出scope=singleExecution，只核验指定执行相对所选计划及当前文件的适用性，不输出项目验收或问题关闭结论。仍受单文件4 MiB、累计32 MiB、1024文件预算约束。退出0只是报告成功；找不到ID则报错。合同或源码已变化仍应显示过期，不重新绑定旧E。保存不可变完整包时同时保留它对应的资料根和证据；归档副本可单独选择导入及核验，不自动合并为当前通过。没有原件只能保持未知。
+
+### 执行显示语义（preview.6 起）
+
+客户端分别显示记录结果、退出码与核验状态。unknown与非零退出并存时，显示「核验未通过 · 非零退出」并保留未知结果；明确failed或失败计数>0仍展示失败记录。passed与非零退出并存提示冲突。机器state、validPass与问题闭环守卫不变，exit3不特殊放行。请保留真实结果、未知计数和命令约定，不能为消除颜色而改写历史E或伪造通过。

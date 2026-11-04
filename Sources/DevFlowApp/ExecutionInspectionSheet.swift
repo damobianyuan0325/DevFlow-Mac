@@ -25,7 +25,9 @@ struct ExecutionInspectionSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     if let result {
-                        Text(result.state.title).font(.headline)
+                        if let execution = request.plan.executions.first(where: { $0.id == request.executionID }) {
+                            ExecutionStatusSummary(execution: execution, state: result.state)
+                        }
                         ForEach(Array(result.reasons.enumerated()), id: \.offset) { _, reason in
                             Text(reason).textSelection(.enabled)
                         }

@@ -6,7 +6,7 @@ public enum VerificationLevel: String, Codable, CaseIterable {
 }
 public enum SupervisionState: String, Codable, CaseIterable {
     case satisfied, partial, failed, unverified, stale, blocked
-    public var title: String { switch self { case .satisfied: return "证据满足"; case .partial: return "部分覆盖"; case .failed: return "存在失败"; case .unverified: return "缺少验证"; case .stale: return "证据已过期"; case .blocked: return "受阻" } }
+    public var title: String { switch self { case .satisfied: return "证据满足"; case .partial: return "部分覆盖"; case .failed: return "核验未通过"; case .unverified: return "缺少验证"; case .stale: return "证据已过期"; case .blocked: return "受阻" } }
 }
 public enum DevelopmentTaskStatus: String, Codable { case planned, inProgress, completed, blocked }
 public enum VerificationResult: String, Codable { case passed, failed, unknown, notRun, blocked }
