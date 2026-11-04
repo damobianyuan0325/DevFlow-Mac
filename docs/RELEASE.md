@@ -110,3 +110,16 @@ shasum -a 256 -c SHA256SUMS.txt
 ## 正式分发前仍缺少什么
 
 Developer ID 发行签名、Apple 公证、对应系统评估，以及独立下载/安装环境中的首次启动和兼容性验证仍需完成。自动升级和正式数据迁移策略尚未提供。当前下载包仅作受授权范围内的预览试用，保留 [隐私](PRIVACY.md)、[安全](../SECURITY.md) 和 [贡献](../CONTRIBUTING.md) 约定。
+
+
+## 核对消费者实际使用的 CLI
+
+`swift run DevFlowChecks` 不会自动重链接兄弟可执行目标 `DevFlowEvidence`；release App 构建也不更新 `.build/debug/DevFlowEvidence`。App 已更新不能作为开发脚本入口已经更新的证据。
+
+`bash scripts/test.sh` 现在显式构建 debug CLI，并用同一合成 JSON 的小文件/10 MiB 文件核对实际二进制的合同输出一致性。独立检查已安装 App 或消费者配置路径时运行：
+
+```sh
+python3 scripts/test-cli-entrypoint.py /absolute/path/to/DevFlowEvidence
+```
+
+此检查输出实际解析路径和 SHA-256，仅证明该入口的容量与合同一致性；不代表项目验收通过。交付时分别记录消费者配置路径、解析路径、二进制摘要、构建源码提交与实际命令结果。不得仅凭 App 版本、构建目录或源码状态推断另一入口已更新。正在执行合同冻结/核验的消费者需要固定工具身份，不能在执行中途替换其 helper。
