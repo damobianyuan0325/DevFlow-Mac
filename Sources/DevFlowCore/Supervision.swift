@@ -204,7 +204,7 @@ public enum SupervisionEvaluator {
         let ids = groups.flatMap { $0 }
         guard ids.count <= 20_000, groups.allSatisfy({ $0.count <= 5_000 }) else { throw DevFlowError.invalid("监督计划超过数量上限。") }
         guard ids.allSatisfy({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && $0.utf8.count <= 128 && $0.rangeOfCharacter(from: .controlCharacters) == nil }), Set(ids).count == ids.count else { throw DevFlowError.invalid("监督计划 ID 为空、过长或重复；各类型 ID 必须全局唯一。") }
-        guard let encoded = try? JSONEncoder().encode(plan), encoded.count <= 8 * 1_024 * 1_024 else { throw DevFlowError.invalid("监督计划超过 8 MiB 上限。") }
+        guard let encoded = try? JSONEncoder().encode(plan), encoded.count <= ProjectImporter.maximumJSONBytes else { throw DevFlowError.invalid("监督计划超过 64 MiB 上限。") }
         let requirements = Set(plan.requirements.map(\.id)), criteria = Set(plan.criteria.map(\.id)), tasks = Set(plan.tasks.map(\.id)), cases = Set(plan.testCases.map(\.id)), executions = Set(plan.executions.map(\.id))
         func references(_ refs: [String], in allowed: Set<String>, owner: String) throws {
             guard Set(refs).count == refs.count, refs.allSatisfy(allowed.contains) else { throw DevFlowError.invalid("\(owner) 含重复或不存在的图关联。") }
@@ -255,7 +255,23 @@ public enum SupervisionEvaluator {
             try references(artifact.executionIDs, in: executions, owner: artifact.id); try recordReferences(artifact.recordIDs)
         }
     }
+    /// A single historical execution is checked against the selected plan and current files.
+    /// This deliberately returns no project acceptance or issue-closure assessment.
+    public static func inspectExecution(plan: SupervisionPlan, root: String, records: [ActivityRecord], executionID: String) throws -> ExecutionAssessment {
+        try validate(plan)
+        guard plan.executions.contains(where: { $0.id == executionID }) else {
+            throw DevFlowError.invalid("执行 ID 不存在：\(executionID)")
+        }
+        let result = evaluateScope(plan: plan, root: root, records: records, executionID: executionID)
+        guard let execution = result.executions.first else { throw DevFlowError.invalid("未生成该执行的核验结果。") }
+        return execution
+    }
+
     public static func evaluate(plan: SupervisionPlan, root: String, records: [ActivityRecord]) -> SupervisionAssessment {
+        evaluateScope(plan: plan, root: root, records: records, executionID: nil)
+    }
+
+    private static func evaluateScope(plan: SupervisionPlan, root: String, records: [ActivityRecord], executionID: String?) -> SupervisionAssessment {
         var assessment = SupervisionAssessment(requirements: [], criteria: [], executions: [], issues: [], artifacts: [], interventions: [], briefing: [], validationErrors: [])
         do { try validate(plan) } catch {
             let reason = error.localizedDescription
@@ -280,7 +296,9 @@ public enum SupervisionEvaluator {
             let newest = entries.compactMap(executionDate).max()
             return entries.filter { executionDate($0) == newest }.map(\.id)
         })
-        let readOrder = plan.executions.filter { currentIDs.contains($0.id) } + plan.executions.filter { !currentIDs.contains($0.id) }
+        let readOrder: [VerificationExecution]
+        if let executionID { readOrder = plan.executions.filter { $0.id == executionID } }
+        else { readOrder = plan.executions.filter { currentIDs.contains($0.id) } + plan.executions.filter { !currentIDs.contains($0.id) } }
         for execution in readOrder {
             let test = tests[execution.testCaseID]!
             var reasons = missingRecords(execution.recordIDs)
@@ -328,6 +346,7 @@ public enum SupervisionEvaluator {
         }
         let originalOrder = Dictionary(uniqueKeysWithValues: plan.executions.enumerated().map { ($0.element.id, $0.offset) })
         assessment.executions.sort { originalOrder[$0.id]! < originalOrder[$1.id]! }
+        if executionID != nil { return assessment }
         let executionAssessments = Dictionary(uniqueKeysWithValues: assessment.executions.map { ($0.id, $0) })
         func latest(_ testID: String) -> [VerificationExecution] {
             let entries = plan.executions.filter { $0.testCaseID == testID }

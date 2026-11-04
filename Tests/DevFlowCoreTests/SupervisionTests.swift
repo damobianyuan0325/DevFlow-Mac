@@ -32,6 +32,49 @@ final class SupervisionTests: CheckCase {
     private func assess(_ plan: SupervisionPlan, records: [ActivityRecord] = []) -> SupervisionAssessment {
         SupervisionEvaluator.evaluate(plan: plan, root: root.path, records: records)
     }
+    func testLargeLedgerRefreshPersistsCompleteHistory() throws {
+        var initial = try plan()
+        initial.executions[0].result = .failed
+        initial.executions[0].exitCode = 1
+        let record = ActivityRecord(id: "rec-failure", kind: .test, title: "Synthetic historical failure", summary: "Keep the original failure and hash", status: .failed, source: initial.executions[0].log!)
+        let url = root.appendingPathComponent("large.json")
+        let encoder = JSONEncoder()
+        try encoder.encode(ImportPackage(name: "Synthetic capacity ledger", records: [record], supervision: initial)).write(to: url)
+        let first = try ProjectImporter.load(url: url)
+        let previous = Project(name: first.name, importPath: url.path, sourceRoot: root.path, records: first.records, supervision: first.supervision)
+        var expanded = initial
+        for index in 1...1500 {
+            var execution = initial.executions[0]
+            execution.id = "E-capacity-\(index)"
+            execution.environment = "Synthetic capacity fixture " + String(repeating: "x", count: 6000)
+            expanded.executions.append(execution)
+        }
+        let bytes = try encoder.encode(ImportPackage(name: first.name, records: [record], supervision: expanded))
+        checkTrue(try encoder.encode(expanded).count > 8 * 1024 * 1024, "The plan itself, not JSON padding, must cross the former limit")
+        try bytes.write(to: url, options: .atomic)
+        let loaded = try ProjectImporter.load(url: url)
+        checkEqual(loaded.supervision, expanded)
+        let refreshed = ProjectSources.refresh(previous)
+        checkNil(refreshed.primaryError)
+        checkEqual(refreshed.project.supervision, expanded)
+        checkEqual(refreshed.project.supervisionHistory, [initial])
+        checkEqual(refreshed.project.records.first?.status, .failed)
+        let storage = WorkspaceStorage(url: root.appendingPathComponent("workspace.json"))
+        var state = WorkspaceState(); state.projects = [refreshed.project]
+        try storage.save(state)
+        let reopened = try storage.load()
+        checkEqual(reopened.projects.first?.supervision, expanded)
+        checkEqual(reopened.projects.first?.supervisionHistory, [initial])
+        checkEqual(reopened.projects.first?.records.first?.source.digest, record.source.digest)
+        checkEqual(try Data(contentsOf: url), bytes, "Import, refresh and persistence must not rewrite the source ledger")
+        // Invalid later input cannot replace the last complete ledger or its history.
+        try Data("invalid".utf8).write(to: url)
+        let rejected = ProjectSources.refresh(refreshed.project)
+        checkTrue(rejected.primaryError != nil)
+        checkEqual(rejected.project.supervision, expanded)
+        checkEqual(rejected.project.supervisionHistory, [initial])
+    }
+
     func testCompleteEvidenceChainIsSatisfied() throws {
         var input = try plan()
         let artifact = try file("dist/DevFlow.zip", "fixture artifact")
@@ -128,9 +171,22 @@ final class SupervisionTests: CheckCase {
         checkEqual(result.executions.map(\.id), input.executions.map(\.id), "Retain full history in original order")
         checkTrue(result.executions.contains { $0.state == .unverified }, "Budget-exhausted history remains unknown")
         checkTrue(result.briefing.joined().contains("预算"))
+        let selected = try SupervisionEvaluator.inspectExecution(plan: input, root: root.path, records: [], executionID: "old-1024")
+        checkTrue(selected.isValidPass, "A historical execution excluded by global budget can be checked independently")
+        try file("history/1024.log", "tampered historical log")
+        let changed = try SupervisionEvaluator.inspectExecution(plan: input, root: root.path, records: [], executionID: "old-1024")
+        checkFalse(changed.isValidPass)
+        checkTrue(changed.reasons.joined().contains("SHA256"))
+        do {
+            _ = try SupervisionEvaluator.inspectExecution(plan: input, root: root.path, records: [], executionID: "missing")
+            checkTrue(false, "Missing ID must not yield a successful report")
+        } catch { checkTrue(error.localizedDescription.contains("不存在")) }
         var failure = current; failure.id = "current-failure"; failure.result = .failed
         input.executions.append(failure)
         checkEqual(assess(input).criteria.first?.state, .failed, "Tied current failure cannot disappear")
+        let failed = try SupervisionEvaluator.inspectExecution(plan: input, root: root.path, records: [], executionID: "current-failure")
+        checkEqual(failed.state, .failed)
+        checkFalse(failed.isValidPass)
     }
 
     func testIssueExplainsExactRequiredLayerMismatch() throws {

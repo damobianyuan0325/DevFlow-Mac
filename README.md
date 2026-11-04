@@ -2,7 +2,7 @@
 
 原生 macOS 项目过程管理与监督客户端。把 AI 辅助开发中的需求、研发、测试、缺陷、决策和交付关联起来，让已有历史与持续新增记录都能回查。
 
-**当前源码版本：`0.2.0-preview.4`（分页、刷新与交互优化）；GitHub 可下载预发布版本：`v0.2.0-preview.3`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。本项目采用 **[MIT 许可证](LICENSE) 开源**，源码、技能和 Release 安装包均可公开获取，无需申请仓库访问权限。
+**当前源码版本：`0.2.0-preview.5`（完整账本容量与历史核验）；GitHub 可下载预发布版本：`v0.2.0-preview.3`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。本项目采用 **[MIT 许可证](LICENSE) 开源**，源码、技能和 Release 安装包均可公开获取，无需申请仓库访问权限。
 
 ## 把仓库链接交给 AI
 
@@ -57,7 +57,7 @@ Mac App 内置完整双技能、离线说明和 `DevFlowEvidence` CLI；拖拽�
 | 集成开发 | `main` | 持续变化，不等同于某个已发布包 |
 | 0.2 系列维护 | `codex/release/0.2` | 维护该系列的预览修复 |
 | 当前 GitHub Release/tag | `v0.2.0-preview.3` | Pre-release，固定 tag 对应精确源码提交 |
-| 当前源码构建版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.4` | 用于预览资产命名和 tag |
+| 当前源码构建版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.5` | 用于预览资产命名和 tag |
 | App 数字版本 | [VERSION](VERSION)：`0.2.0` | macOS 应用内显示的数字版本 |
 | 早期本地研发 | `0.1.0`、`0.1.1` | 保留更新历史，不补造 GitHub Release/tag |
 
@@ -75,4 +75,4 @@ Tag 创建后不移动；新产物或修复使用新预览版本。分支、tag�
 | AI 技能与数据协议 | [接入指南](docs/agent-quickstart.md) · [问题处理](docs/agent-resolution.md) · [监督协议](docs/supervision-protocol.md) |
 | 数据、安全、贡献与许可 | [隐私](docs/PRIVACY.md) · [安全](SECURITY.md) · [贡献](CONTRIBUTING.md) · [许可证](LICENSE) |
 
-源码 preview.4 的内容及验证边界见 [版本说明](docs/releases/v0.2.0-preview.4.md)。尚未发布同版 GitHub 安装包；上面的下载链接仍对应 preview.3。
+源码 preview.5 的内容及验证边界见 [版本说明](docs/releases/v0.2.0-preview.5.md)。尚未发布同版 GitHub 安装包；上面的下载链接仍对应 preview.3。

@@ -50,6 +50,7 @@ struct SupervisionView: View {
     @State private var verificationPage: VerificationPage = .cases
     @State private var focusedID: String?
     @State private var feedbackTarget: FeedbackTarget?
+    @State private var executionInspection: ExecutionInspectionRequest?
 
     private struct FeedbackTarget: Identifiable { let id: String }
     private var assessment: SupervisionAssessment? { store.supervisionAssessment }
@@ -111,6 +112,7 @@ struct SupervisionView: View {
         .background(DevFlowStyle.canvas)
         .accessibilityIdentifier("supervisionWorkspace")
         .onAppear { if startsWithFeedback { page = .intervention } }
+        .sheet(item: $executionInspection) { request in ExecutionInspectionSheet(request: request) }
         .sheet(item: $feedbackTarget) { target in
             SupervisionFeedbackSheet(targetID: target.id, initialText: store.supervisionFeedbackText(targetID: target.id))
                 .environmentObject(store)
@@ -333,6 +335,11 @@ struct SupervisionView: View {
                 SmallBadge(text: "记录结果：\(verificationResult(item.result))", color: .secondary)
                 SmallBadge(text: item.level.title, color: .secondary)
                 Spacer()
+                Button("单独核验") {
+                    executionInspection = ExecutionInspectionRequest(plan: plan, root: project.sourceRoot, records: project.records, executionID: item.id)
+                }
+                .help("使用独立读取预算核验这次执行；不改变项目验收或问题闭环结论")
+                .accessibilityIdentifier("supervision.inspectExecution.\(item.id)")
                 feedbackButton(item.id)
             }
             textLines(result?.reasons ?? [], empty: "尚未完成证据适用性核查")

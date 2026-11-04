@@ -23,18 +23,18 @@ final class ImporterTests: CheckCase {
     }
 
     func testJSONCapacityBoundaryHasActionableWarning() throws {
-        let limit = 8 * 1024 * 1024
+        let limit = 64 * 1024 * 1024
         let base = "{\"schemaVersion\":1,\"name\":\"Capacity fixture\",\"records\":[]}"
         let url = try write("capacity.json", base + String(repeating: " ", count: limit - base.utf8.count))
         let imported = try ProjectImporter.load(url: url)
-        checkTrue(imported.warnings.contains { $0.contains("接近 8 MiB") })
+        checkTrue(imported.warnings.contains { $0.contains("接近 64 MiB") })
         let original = try Data(contentsOf: url) + Data([32])
         try original.write(to: url)
         do {
             _ = try ProjectImporter.load(url: url)
             checkTrue(false, "Oversize JSON must fail")
         } catch {
-            checkTrue(error.localizedDescription.contains("8388609"))
+            checkTrue(error.localizedDescription.contains("67108865"))
             checkTrue(error.localizedDescription.contains("不要删除失败历史"))
         }
         checkEqual(try Data(contentsOf: url), original, "Read-only import must preserve the entire input")
