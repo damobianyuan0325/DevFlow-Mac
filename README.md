@@ -2,7 +2,7 @@
 
 原生 macOS 项目过程管理与监督客户端。把 AI 辅助开发中的需求、研发、测试、缺陷、决策和交付关联起来，让已有历史与持续新增记录都能回查。
 
-**当前源码版本：`0.2.0-preview.6`（执行结果与核验状态展示修正）；GitHub 可下载预发布版本：`v0.2.0-preview.3`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。本项目采用 **[MIT 许可证](LICENSE) 开源**，源码、技能和 Release 安装包均可公开获取，无需申请仓库访问权限。
+**当前源码版本：`0.2.0-preview.7`（执行结果与核验状态展示修正）；GitHub 可下载预发布版本：`v0.2.0-preview.7`；App 数字版本：`0.2.0`。** 当前面向 Apple Silicon、macOS 14+，仍是 ad-hoc 本地签名预览，没有 Developer ID 发行签名或 Apple 公证。本项目采用 **[MIT 许可证](LICENSE) 开源**，源码、技能和 Release 安装包均可公开获取，无需申请仓库访问权限。
 
 ## 把仓库链接交给 AI
 
@@ -16,7 +16,7 @@ AI 的统一入口是 [AGENT_INSTALL.md](AGENT_INSTALL.md)：先判断运行环�
 
 ## 开始使用
 
-无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow-Mac/releases/tag/v0.2.0-preview.3) 取得 `DevFlow-0.2.0-preview.3-macOS-arm64.dmg`，按 [用户指南](docs/USER_GUIDE.md) 打开 DMG 并将 `DevFlow.app` 复制到“应用程序”。下载无需申请权限；文件名与摘要以对应 Release 页为准。
+无需 Swift 的使用者可从 [固定版本下载页](https://github.com/damobianyuan0325/DevFlow-Mac/releases/tag/v0.2.0-preview.7) 取得 `DevFlow-0.2.0-preview.7-macOS-arm64.dmg`，按 [用户指南](docs/USER_GUIDE.md) 打开 DMG 并将 `DevFlow.app` 复制到“应用程序”。下载无需申请权限；文件名与摘要以对应 Release 页为准。
 
 首次启动可能受到 macOS 对未公证应用的限制，不能保证下载后直接打开。免费预览版无需购买 Apple 开发者会员。确认来源及摘要后，可按用户指南使用系统“仍要打开”对单个应用放行；无需关闭全局系统安全保护。
 
@@ -44,9 +44,9 @@ open dist/DevFlow.app
 
 [devflow-record](skills/devflow-record/SKILL.md) 用于保留一句话需求、拆解、真实动作与执行证据，生成本地监督包；[devflow-resolve](skills/devflow-resolve/SKILL.md) 用于核对反馈、补证或修复、复验和回写。两者均可独立使用，`gated-delivery` 是显式选择的可选研发适配。
 
-也可直接下载 [Mac 安装 DMG](https://github.com/damobianyuan0325/DevFlow-Mac/releases/download/v0.2.0-preview.3/DevFlow-0.2.0-preview.3-macOS-arm64.dmg) 或 [完整技能 ZIP](https://github.com/damobianyuan0325/DevFlow-Mac/releases/download/v0.2.0-preview.3/DevFlow-agent-skills-0.2.0-preview.3.zip)。
+也可直接下载 [Mac 安装 DMG](https://github.com/damobianyuan0325/DevFlow-Mac/releases/download/v0.2.0-preview.7/DevFlow-0.2.0-preview.7-macOS-arm64.dmg) 或 [完整技能 ZIP](https://github.com/damobianyuan0325/DevFlow-Mac/releases/download/v0.2.0-preview.7/DevFlow-agent-skills-0.2.0-preview.7.zip)。
 
-Release 的技能包文件名为 `DevFlow-agent-skills-0.2.0-preview.3.zip`，保留完整技能目录及配套资料；宿主安装方式见 [接入指南](docs/agent-quickstart.md) 与 [问题处理指南](docs/agent-resolution.md)。客户端不会自动安装或调用技能。
+Release 的技能包文件名为 `DevFlow-agent-skills-0.2.0-preview.7.zip`，保留完整技能目录及配套资料；宿主安装方式见 [接入指南](docs/agent-quickstart.md) 与 [问题处理指南](docs/agent-resolution.md)。客户端不会自动安装或调用技能。
 
 Mac App 内置完整双技能、离线说明和 `DevFlowEvidence` CLI；拖拽安装后全部保留。菜单可打开资料或复制给AI的接入提示，见[安装与代理接入](AGENT_INSTALL.md)。独立技能ZIP不含CLI。它提供只读 `contracts` 和 `inspect`，具体步骤见 [证据工具指南](docs/agent-quickstart.md#获取实际可用的证据工具)。
 
@@ -56,8 +56,8 @@ Mac App 内置完整双技能、离线说明和 `DevFlowEvidence` CLI；拖拽�
 | --- | --- | --- |
 | 集成开发 | `main` | 持续变化，不等同于某个已发布包 |
 | 0.2 系列维护 | `codex/release/0.2` | 维护该系列的预览修复 |
-| 当前 GitHub Release/tag | `v0.2.0-preview.3` | Pre-release，固定 tag 对应精确源码提交 |
-| 当前源码构建版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.6` | 用于预览资产命名和 tag |
+| 当前 GitHub Release/tag | `v0.2.0-preview.7` | Pre-release，固定 tag 对应精确源码提交 |
+| 当前源码构建版本 | [REL_VERSION](REL_VERSION)：`0.2.0-preview.7` | 用于预览资产命名和 tag |
 | App 数字版本 | [VERSION](VERSION)：`0.2.0` | macOS 应用内显示的数字版本 |
 | 早期本地研发 | `0.1.0`、`0.1.1` | 保留更新历史，不补造 GitHub Release/tag |
 
@@ -68,11 +68,11 @@ Tag 创建后不移动；新产物或修复使用新预览版本。分支、tag�
 | 需要什么 | 文档 |
 | --- | --- |
 | 下载、安装、首次使用、备份、升级、卸载及常见问题 | [用户指南](docs/USER_GUIDE.md) |
-| 当前版本的内容、资产和限制 | [v0.2.0-preview.3 发布说明](docs/releases/v0.2.0-preview.3.md) |
+| 当前版本的内容、资产和限制 | [v0.2.0-preview.7 发布说明](docs/releases/v0.2.0-preview.7.md) |
 | 构建、打包、检查与分发条件 | [发布指南](docs/RELEASE.md) |
 | 版本、分支、tag 与更新历史 | [版本规则](docs/VERSIONING.md) · [更新记录](docs/CHANGELOG.md) |
 | 功能与后续范围 | [产品](docs/PRODUCT.md) · [路线与验收](docs/ROADMAP.md) |
 | AI 技能与数据协议 | [接入指南](docs/agent-quickstart.md) · [问题处理](docs/agent-resolution.md) · [监督协议](docs/supervision-protocol.md) |
 | 数据、安全、贡献与许可 | [隐私](docs/PRIVACY.md) · [安全](SECURITY.md) · [贡献](CONTRIBUTING.md) · [许可证](LICENSE) |
 
-源码 preview.6 的内容及验证边界见 [版本说明](docs/releases/v0.2.0-preview.6.md)。尚未发布同版 GitHub 安装包；上面的下载链接仍对应 preview.3。
+源码 preview.7 的内容及验证边界见 [版本说明](docs/releases/v0.2.0-preview.7.md)。资产与发布状态以对应 Release 页为准。
