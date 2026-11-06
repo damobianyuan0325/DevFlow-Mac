@@ -2,13 +2,13 @@
 
 如果用户把 DevFlow 仓库链接交给你，从本文件开始。目标是让用户安装 Mac 客户端，并让其开发代理持续提供可检查的项目资料。此入口支持从仓库、独立技能 ZIP 或已安装 App 开始；不要求用户先懂技能安装方式。
 
-当前版本为 **0.2.0-preview.7**，下载资产以对应 Release 页面为准。仓库分支中的接入说明可以继续改进，已发布 tag、DMG 和 ZIP 不随之改写。安装包内版本以 REL_VERSION 和 BUILD-INFO.json 为准；获取该版技能和工具时使用同一 Release/tag，不把分支上的新文件混入旧 App。
+当前版本为 **0.2.0-preview.8**，下载资产以对应 Release 页面为准。仓库分支中的接入说明可以继续改进，已发布 tag、DMG 和 ZIP 不随之改写。安装包内版本以 REL_VERSION 和 BUILD-INFO.json 为准；获取该版技能和工具时使用同一 Release/tag，不把分支上的新文件混入旧 App。
 
 ## AI 拿到链接后按什么顺序做
 
 1. **明确用户要接入的项目。** 先读 README 和本入口，区分 DevFlow 工具仓库与用户业务项目。用户已经指定项目时沿用；没有指定且当前上下文也无法确定时，只询问项目位置或项目名称。不能默认把下载的 DevFlow 源码当成用户业务项目。
 2. **检查能做什么。** 确认是否能读仓库、是否在用户本机、Mac 系统和芯片类型、是否已有 DevFlow，以及是否有本地文件和命令执行能力。只检查当前授权目录和明确的安装位置，不扫描其他项目、会话或凭据。本仓库已公开；读取失败时先区分网络或代理工具限制，并使用用户提供的本地仓库或完整技能包，不索要密码或令牌。
-3. **选择同一发布版本。** 从 README 指向的[固定 Release 页](https://github.com/damobianyuan0325/DevFlow-Mac/releases/tag/v0.2.0-preview.7)取得 DMG、可选技能 ZIP 和校验清单。比较下载文件摘要；只下载部分文件时逐个核对对应条目。已安装 App 时先读取其 AgentIntegration/BUILD-INFO.json 和 REL_VERSION，使用对应版本资料。需要升级时先保留旧 App 和工作区备份。不要用“下载成功”代替安装和启动验证。
+3. **选择同一发布版本。** 从 README 指向的[固定 Release 页](https://github.com/damobianyuan0325/DevFlow-Mac/releases/tag/v0.2.0-preview.8)取得 DMG、可选技能 ZIP 和校验清单。比较下载文件摘要；只下载部分文件时逐个核对对应条目。已安装 App 时先读取其 AgentIntegration/BUILD-INFO.json 和 REL_VERSION，使用对应版本资料。需要升级时先保留旧 App 和工作区备份。不要用“下载成功”代替安装和启动验证。
 4. **按环境走下一步。** 参考下表。使用者无需为运行已构建的 App 安装 Swift，也无需购买 Apple 开发者会员。免费包的首次打开提示按用户指南处理，不能自动关闭全局系统保护。
 5. **读取完整技能并接入。** 在用户的项目中，按 [devflow-record](skills/devflow-record/SKILL.md) 保存一句话原始需求，拆解要求、验收、任务和测试，持续追加真实动作及证据。处理已有反馈时用 [devflow-resolve](skills/devflow-resolve/SKILL.md)。有已有台账则保留并合并，不直接覆盖；未实际执行的测试不能标成通过。技能可直接作为工作说明阅读，只有宿主支持且用户授权时才安装到宿主目录；不强制依赖 gated-delivery。
 6. **交付可检查的接入结果。** 有真实 CLI 时先执行只读 inspect 并解释错误、告警和证据状态；首次让用户在客户端手动导入生成的 JSON。完成时按下方清单汇报。没有本机/UI权限时，只能声明资料已准备，不能声称 App 已安装或项目已在客户端显示。
@@ -31,7 +31,7 @@
 
 ## 用户安装
 
-1. 下载 DevFlow-0.2.0-preview.7-macOS-arm64.dmg 并双击打开。
+1. 下载 DevFlow-0.2.0-preview.8-macOS-arm64.dmg 并双击打开。
 2. 将 DevFlow.app 拖到 Applications。若已有旧版，先退出并保留旧App及工作区备份，再替换。
 3. 弹出安装卷，从“应用程序”启动 DevFlow。技能已经在 App 内，无需另行下载。
 4. 打开 DevFlow 菜单的“打开技能与接入说明…”或“复制给 AI 的接入说明”，将提示粘贴给有本地文件读取权限的开发代理。

@@ -3,7 +3,7 @@ import CoreFoundation
 
 /// Imports explicitly selected Codex JSONL evidence. It never executes log content.
 public enum CodexSessionImporter {
-    private static let byteLimit = 32 * 1_024 * 1_024
+    private static let byteLimit = 200 * 1_024 * 1_024
     private static let eventLimit = 20_000
     private struct Row {
         var number: Int
@@ -69,7 +69,7 @@ public enum CodexSessionImporter {
                 disposition[line] = (index == pieces.count - 1 && !endedWithNewline) ? "partial" : "invalid"
             }
         }
-        if byteTruncated { warnings.append("会话超过 32 MiB，本次仅读取文件前缀；后续动作尚未读取，不能代表完整会话。") }
+        if byteTruncated { warnings.append("会话超过 200 MiB，本次仅读取文件前缀；后续动作尚未读取，不能代表完整会话。") }
         if !endedWithNewline, !pieces.isEmpty, disposition[pieces.count] != "partial" {
             warnings.append("会话尾行尚无换行符；已解析完整 JSON，后续刷新仍需核对追加内容。")
         }

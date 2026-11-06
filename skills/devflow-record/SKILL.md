@@ -1,13 +1,13 @@
 ---
 name: devflow-record
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
 description: "为 AI 辅助开发项目接入 DevFlow：将一句话需求拆为需求、验收、任务和测试，持续保存实际动作、执行证据、问题修复与历史，生成和维护本地 devflow-supervision.json。用户要求接入 DevFlow、让研发过程可见、复盘历史或准备供 DevFlow 导入的资料时使用。可与现有研发技能配合；不负责控制其他智能体、执行导入内容或对外发布。"
 ---
 
 # DevFlow 研发过程接入
 
-把开发过程变成可检查的本地资料。技能版本 1.0.3；与应用和数据协议分开。适配 DevFlow 0.2.0：外层 JSON schema 2，监督计划 schema 1。先读本入口；写 JSON 时查 [字段协议](references/protocol.md)，执行检查、修复和交接时查 [工作流程](references/workflow.md)。整个技能目录可单独复制使用，不依赖另一份技能。
+把开发过程变成可检查的本地资料。技能版本 1.0.4；与应用和数据协议分开。适配 DevFlow 0.2.0：外层 JSON schema 2，监督计划 schema 1。先读本入口；写 JSON 时查 [字段协议](references/protocol.md)，执行检查、修复和交接时查 [工作流程](references/workflow.md)。整个技能目录可单独复制使用，不依赖另一份技能。
 
 ## 角色与交付
 
